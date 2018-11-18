@@ -5,3 +5,4 @@ pkg/
 vendor
 /.idea/vcs.xml
 /storage
+go.sum
