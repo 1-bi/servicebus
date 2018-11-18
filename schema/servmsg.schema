@@ -1,0 +1,25 @@
+struct ReqMsg {
+    Id      string
+    Params  []byte
+}
+
+struct CodeError {
+	Code    string
+	MsgBody string
+	Prefix  string
+}
+
+struct Result {
+	ResultRef []byte
+	Err       *CodeError
+}
+
+struct ResultItem {
+    Key         string
+    Result      *Result
+}
+
+struct ResMsg {
+    Id          string
+    Response    []*ResultItem
+}
