@@ -2,10 +2,10 @@ package servicebus
 
 import (
 	"fmt"
+	"github.com/1-bi/servicebus/errors"
+	"github.com/1-bi/servicebus/schema"
 	"github.com/nats-io/go-nats"
 	"github.com/vmihailenco/msgpack"
-	"gitlab.com/vicenteyuen/tmall-splider/errors"
-	"gitlab.com/vicenteyuen/tmall-splider/servicebus/schema"
 	"log"
 	"sync"
 	"time"
