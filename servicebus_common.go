@@ -428,22 +428,40 @@ func (this *baseFutureReturnResult) ReturnResult(inReturn interface{}) errors.Co
 }
 
 /**
+
+ */
+type EventMapping struct {
+	EventName string
+
+	// binding reference instance
+	Ref interface{}
+
+	FunctionName string
+}
+
+/**
  * define event delegate
  */
 type EventsDelegate struct {
-	eventholder map[string]ServiceeventHandler
+	eventholder map[string]*EventMapping
 }
 
-func (this *EventsDelegate) AddEvent(event string, handler ServiceeventHandler) {
-	this.eventholder[event] = handler
+func (this *EventsDelegate) AddEvent(event string, handler interface{}, functionName string) {
+
+	eventMapping := new(EventMapping)
+	eventMapping.EventName = event
+	eventMapping.Ref = handler
+	eventMapping.FunctionName = functionName
+
+	this.eventholder[event] = eventMapping
 }
 
-func (this *EventsDelegate) AllEventsPredefined() map[string]ServiceeventHandler {
+func (this *EventsDelegate) AllEventsPredefined() map[string]*EventMapping {
 	return this.eventholder
 }
 
 func NewEventsDelegate() *EventsDelegate {
 	delegate := new(EventsDelegate)
-	delegate.eventholder = make(map[string]ServiceeventHandler, 0)
+	delegate.eventholder = make(map[string]*EventMapping, 0)
 	return delegate
 }

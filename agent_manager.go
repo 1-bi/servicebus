@@ -22,7 +22,7 @@ type baseServiceAgent struct {
 	/**
 	 * define function holder
 	 */
-	fnHolder map[string][]ServiceeventHandler
+	fnHolder map[string][]ServiceEventHandler
 }
 
 /**
@@ -46,7 +46,7 @@ func NewServiceAgent() (ServiceAgent, error) {
 	//mpe := new(MessagePackEncoder)
 	//bsm.msgencoder = mpe
 
-	holder := make(map[string][]ServiceeventHandler, 0)
+	holder := make(map[string][]ServiceEventHandler, 0)
 
 	bsm.fnHolder = holder
 
@@ -62,7 +62,7 @@ func NewServiceManager() (ServiceManager, error) {
 	//mpe := new(MessagePackEncoder)
 	//bsm.msgencoder = mpe
 
-	holder := make(map[string][]ServiceeventHandler, 0)
+	holder := make(map[string][]ServiceEventHandler, 0)
 
 	bsm.fnHolder = holder
 
@@ -72,7 +72,7 @@ func NewServiceManager() (ServiceManager, error) {
 /**
  * define base global service handle
  */
-func (this *baseServiceAgent) On(serviceId string, fn ServiceeventHandler) error {
+func (this *baseServiceAgent) On(serviceId string, fn ServiceEventHandler) error {
 
 	existedFn := this.fnHolder[serviceId]
 

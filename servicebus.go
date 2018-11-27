@@ -19,7 +19,7 @@ type ServiceEvent interface {
 	/**
 	 * call one service handle
 	 */
-	On(serviceId string, fn ServiceeventHandler) error
+	On(serviceId string, fn ServiceEventHandler) error
 
 	/**
 	 * create fire service event object , but the object is not runt
@@ -86,8 +86,9 @@ type Result interface {
 
 /**
  * contruct service event handler
+ * @deplecated this object is not to use
  */
-type ServiceeventHandler interface {
+type ServiceEventHandler interface {
 	/**
 	 * define root object
 	 */
