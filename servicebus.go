@@ -19,7 +19,7 @@ type ServiceEvent interface {
 	/**
 	 * call one service handle
 	 */
-	On(serviceId string, fn ServiceEventHandler) error
+	On(serviceId string, fn func(ServiceEventHandler)) error
 
 	/**
 	 * create fire service event object , but the object is not runt

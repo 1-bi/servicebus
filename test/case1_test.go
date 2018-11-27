@@ -1,9 +1,22 @@
 package test
 
 import (
+	"github.com/1-bi/servicebus"
+	"log"
 	"testing"
 )
 
-func Test_Case1_Subscribe_Test(t *testing.T) {
+/**
+ * defined publish message
+ */
+func Test_Case1_Publish(t *testing.T) {
+
+	agent := servicebus.NewServiceAgent()
+
+	codeErr := agent.FireWithNoReply("event.test", "hello world")
+
+	if codeErr != nil {
+		log.Panic(codeErr)
+	}
 
 }

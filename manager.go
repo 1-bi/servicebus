@@ -37,7 +37,7 @@ type baseServiceManager struct {
  *  new service agent
  * -------------------------------
  */
-func NewServiceAgent() (ServiceAgent, error) {
+func NewServiceAgent() ServiceAgent {
 
 	bsm := new(baseServiceAgent)
 
@@ -50,7 +50,7 @@ func NewServiceAgent() (ServiceAgent, error) {
 
 	bsm.fnHolder = holder
 
-	return bsm, nil
+	return bsm
 }
 
 func NewServiceManager() (ServiceManager, error) {

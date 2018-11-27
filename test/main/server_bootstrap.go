@@ -10,13 +10,15 @@ func main() {
 
 	// ---- create service bus manager ----
 
-	servusManager, err := servicebus.NewServiceManager()
+	serviceManager, err := servicebus.NewServiceManager()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	servusManager.ListenServices()
+	serviceManager.On()
+
+	serviceManager.ListenServices()
 
 	// ---- keep program running ----
 	runtime.Goexit()
