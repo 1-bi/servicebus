@@ -26,11 +26,13 @@ func Test_Req_Res_Case1(t *testing.T) {
 	if codeErr != nil {
 		log.Panic(codeErr)
 	} else {
+
 		codeErr = f.Await()
 
 		if codeErr != nil {
 
 			log.Panic(codeErr)
+
 		}
 
 		result, resErr := f.GetResult()
@@ -38,8 +40,14 @@ func Test_Req_Res_Case1(t *testing.T) {
 		if resErr != nil {
 			log.Panic(resErr)
 		}
+
+		var resstr string
+
+		result.ReturnResult(&resstr)
+
 		fmt.Println(" response result ------------------ ")
 		fmt.Println(result)
+		fmt.Println(resstr)
 		fmt.Println(" response result ------------------ ")
 	}
 

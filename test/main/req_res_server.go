@@ -41,6 +41,7 @@ func testReqResHandler1(handler servicebus.ServiceEventHandler) {
 	})
 
 	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+
 		reqData := bc.GetRequestData()
 
 		result := bc.GetResult()
@@ -49,6 +50,7 @@ func testReqResHandler1(handler servicebus.ServiceEventHandler) {
 
 		fmt.Println(" request data : ")
 		fmt.Println(reqData)
+
 		return nil
 	})
 
@@ -66,6 +68,7 @@ func testReqResHandler2(handler servicebus.ServiceEventHandler) {
 
 		fmt.Println(" request data2 : ")
 		fmt.Println(reqData)
+
 		return nil
 	})
 

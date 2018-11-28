@@ -6,7 +6,6 @@
 package servicebus
 
 import (
-	"github.com/1-bi/servicebus/models"
 	"reflect"
 	"time"
 )
@@ -39,18 +38,6 @@ func FunctypeInObject(object interface{}) string {
 	objectType := reflect.TypeOf(object)
 	function := objectType.Elem().String()
 	return function
-}
-
-/**
- * create new message
- */
-func NewRequestMsg(id string, params interface{}) (reqmsg *models.RequestMsg) {
-	reqmsg = new(models.RequestMsg)
-	reqmsg.Id = id
-	reqmsg.Params = params
-
-	// ---- get the type mapping
-	return reqmsg
 }
 
 /**

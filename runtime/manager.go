@@ -9,6 +9,8 @@ import (
 	"github.com/nats-io/go-nats"
 	"github.com/vmihailenco/msgpack"
 	"log"
+	"reflect"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -167,6 +169,8 @@ func (this *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultIt
 		// --- use goroutine ----
 		go func() {
 
+			funName := runtime.FuncForPC(reflect.ValueOf(servHandler).Pointer()).Name()
+
 			// --- create handler servert handler implement
 			eventHandler := new(eventHandlerImpl)
 			eventHandler.serviceManager = this
@@ -210,7 +214,7 @@ func (this *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultIt
 			}
 
 			item := new(schema.ResultItem)
-			//item.Key = objTypeName
+			item.Key = funName
 			item.Result = result
 
 			results = append(results, item)
