@@ -191,46 +191,30 @@ func (this *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultIt
 
 			eventHandler.doProcess()
 
-			/*
-				// --- bind params ------
+			// ---- get the function name ----
+			// ---- conver schema result ----
+			eventbusCtx := eventHandler.eventBusCtx
+			result := new(schema.Result)
+			result.ResultRef = eventbusCtx.result.ResultRef
 
+			// --- check the error ---
+			if eventbusCtx.result.Err != nil {
 
-				// --- invoke function with parameter ----
-				// ---- get the object type name ----
-				objTypeName := servicebus.FunctypeInObject(servHandler)
+				error := new(schema.CodeError)
+				error.Code = eventbusCtx.result.Err.Code()
+				error.Prefix = eventbusCtx.result.Err.Prefix()
+				error.MsgBody = eventbusCtx.result.Err.MsgBody()
 
-				// --- create local bus context ---
-				eventbusCtx := newEventbusContextImpl(bindRef, this)
+				result.Err = error
 
-				err := servHandler.Process(eventbusCtx)
+			}
 
-				if err != nil {
+			item := new(schema.ResultItem)
+			//item.Key = objTypeName
+			item.Result = result
 
-				}
+			results = append(results, item)
 
-				// ---- get the function name ----
-				// ---- conver schema result ----
-				result := new(schema.Result)
-				result.ResultRef = eventbusCtx.result.ResultRef
-
-				// --- check the error ---
-				if eventbusCtx.result.Err != nil {
-
-					error := new(schema.CodeError)
-					error.Code = eventbusCtx.result.Err.Code()
-					error.Prefix = eventbusCtx.result.Err.Prefix()
-					error.MsgBody = eventbusCtx.result.Err.MsgBody()
-
-					result.Err = error
-
-				}
-
-				item := new(schema.ResultItem)
-				item.Key = objTypeName
-				item.Result = result
-
-				results = append(results, item)
-			*/
 			wg.Done()
 
 		}()

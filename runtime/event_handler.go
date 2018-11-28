@@ -14,6 +14,7 @@ type eventHandlerImpl struct {
 	bindRequestObj interface{}
 	bindProcessor  func(bc servicebus.EventbusContext) errors.CodeError
 	serviceManager *baseServiceManager
+	eventBusCtx    *eventbusContextImpl
 }
 
 func (this *eventHandlerImpl) ConvertRequestBody(bingObjFn func() interface{}) {
@@ -36,9 +37,9 @@ func (this *eventHandlerImpl) doProcess() {
 		requestData = this.bindRequestObj
 	}
 
-	eventBusCtx := newEventbusContextImpl(requestData, this.serviceManager)
+	this.eventBusCtx = newEventbusContextImpl(requestData, this.serviceManager)
 
-	err := this.bindProcessor(eventBusCtx)
+	err := this.bindProcessor(this.eventBusCtx)
 	if err != nil {
 		log.Fatal(err)
 	}
