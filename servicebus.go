@@ -55,7 +55,7 @@ type ServiceManager interface {
 
 // --- create bus context ----
 type EventbusContext interface {
-	GetRoot() interface{}
+	GetRequestData() interface{}
 
 	/**
 	 * Get the result inteface
@@ -93,7 +93,7 @@ type ServiceEventHandler interface {
 	/**
 	 * define request body object
 	 */
-	ConvertRequestBody(func() interface{})
+	ConvertRequestBody(func() (reqData interface{}))
 
 	/**
 	 * define process handler

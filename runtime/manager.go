@@ -1,11 +1,13 @@
 package runtime
 
 import (
+	"fmt"
 	"github.com/1-bi/servicebus"
 	"github.com/1-bi/servicebus/errors"
 	"github.com/1-bi/servicebus/models"
 	"github.com/1-bi/servicebus/schema"
 	"github.com/nats-io/go-nats"
+	"github.com/vmihailenco/msgpack"
 	"log"
 	"sync"
 	"time"
@@ -166,27 +168,32 @@ func (this *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultIt
 		go func() {
 
 			// --- create handler servert handler implement
-			eventHandler := eventHandlerImpl{}
+			eventHandler := new(eventHandlerImpl)
+			eventHandler.serviceManager = this
 
-			servHandler(&eventHandler)
+			// --- predefine handler ----
+			servHandler(eventHandler)
+
+			if eventHandler.bindRequestObj != nil {
+
+				// ---- parse object ---
+
+				err := msgpack.Unmarshal(req.Params, eventHandler.bindRequestObj)
+
+				if err != nil {
+
+					codeErr := errors.NewCodeErrorWithPrefix("servbus", "errUnmarshalMessageToBean", "Convert bean error : "+err.Error())
+
+					fmt.Println(codeErr)
+
+				}
+			}
+
+			eventHandler.doProcess()
 
 			/*
 				// --- bind params ------
-				bindRef := servHandler.BindParams()
 
-				if bindRef != nil {
-
-					// ---- parse object ---
-					err := msgpack.Unmarshal(req.Params, bindRef)
-
-					if err != nil {
-
-						codeErr := errors.NewCodeErrorWithPrefix("servbus", "errUnmarshalMessageToBean", "Convert bean error : "+err.Error())
-
-						fmt.Println(codeErr)
-
-					}
-				}
 
 				// --- invoke function with parameter ----
 				// ---- get the object type name ----

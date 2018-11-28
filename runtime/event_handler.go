@@ -1,25 +1,46 @@
 package runtime
 
 import (
-	"fmt"
 	"github.com/1-bi/servicebus"
 	"github.com/1-bi/servicebus/errors"
+	"log"
+	"reflect"
 )
 
 /**
  * define inner eventhandler
  */
 type eventHandlerImpl struct {
+	bindRequestObj interface{}
+	bindProcessor  func(bc servicebus.EventbusContext) errors.CodeError
+	serviceManager *baseServiceManager
 }
 
 func (this *eventHandlerImpl) ConvertRequestBody(bingObjFn func() interface{}) {
-	returnObj := bingObjFn()
-	fmt.Println(returnObj)
+	this.bindRequestObj = bingObjFn()
 }
 
 func (this *eventHandlerImpl) Process(processFn func(bc servicebus.EventbusContext) errors.CodeError) {
-	//returnObj := processFn()
-	//fmt.Println( returnObj )
+	this.bindProcessor = processFn
+}
 
-	fmt.Println(" message ok  ")
+func (this *eventHandlerImpl) doProcess() {
+
+	// request data interface
+	var requestData interface{}
+
+	// --- assign  new value object ----
+	if reflect.TypeOf(this.bindRequestObj).Kind() == reflect.Ptr {
+		requestData = reflect.ValueOf(this.bindRequestObj).Elem()
+	} else {
+		requestData = this.bindRequestObj
+	}
+
+	eventBusCtx := newEventbusContextImpl(requestData, this.serviceManager)
+
+	err := this.bindProcessor(eventBusCtx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

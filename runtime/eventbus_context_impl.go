@@ -20,7 +20,7 @@ func (this *eventbusContextImpl) setParams(in interface{}) {
 	this.params = in
 }
 
-func (this *eventbusContextImpl) GetRoot() interface{} {
+func (this *eventbusContextImpl) GetRequestData() interface{} {
 	return this.params
 }
 
