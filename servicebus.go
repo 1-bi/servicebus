@@ -89,12 +89,23 @@ type Result interface {
  * @deplecated this object is not to use
  */
 type ServiceEventHandler interface {
+
+	/**
+	 * define request body object
+	 */
+	ConvertRequestBody(func() interface{})
+
+	/**
+	 * define process handler
+	 */
+	Process(func(bc EventbusContext) errors.CodeError)
+
 	/**
 	 * define root object
 	 */
-	BindParams() interface{}
+	//BindParams() interface{}
 
-	Process(bc EventbusContext) errors.CodeError
+	//Process(bc EventbusContext) errors.CodeError
 }
 
 /**

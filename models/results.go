@@ -1,4 +1,4 @@
-package servicebus
+package models
 
 import (
 	"github.com/1-bi/servicebus/errors"
@@ -35,7 +35,7 @@ func (this *BaseResult) IsSuccess() bool {
 /**
  * create new Result Object
  */
-func NewResult() Result {
+func NewResult() *BaseResult {
 	br := new(BaseResult)
 	return br
 }
