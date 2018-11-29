@@ -16,7 +16,7 @@ func Test_Subscribe_Publish_Case1(t *testing.T) {
 
 	agent := rt.NewServiceAgent(natsUrl)
 
-	codeErr := agent.FireWithNoReply("event.test1", "hello world")
+	codeErr := agent.FireService("event.test1", "hello world")
 
 	if codeErr != nil {
 		log.Panic(codeErr)
@@ -31,7 +31,7 @@ func Test_Subscribe_Publish_Case2(t *testing.T) {
 	agent := rt.NewServiceAgent(natsUrl)
 	var a int = 10000
 
-	codeErr := agent.FireWithNoReply("event.test2", a)
+	codeErr := agent.FireService("event.test2", a)
 
 	if codeErr != nil {
 		log.Panic(codeErr)
@@ -48,7 +48,7 @@ func Test_Subscribe_Publish_Case3(t *testing.T) {
 	basemap := make(map[string]string, 0)
 	basemap["testcase01"] = "testvalue01"
 
-	codeErr := agent.FireWithNoReply("event.test3", basemap)
+	codeErr := agent.FireService("event.test3", basemap)
 
 	if codeErr != nil {
 		log.Panic(codeErr)
@@ -66,7 +66,7 @@ func Test_Subscribe_Publish_Case4(t *testing.T) {
 	mockObj1.Name = "Hello, good boy."
 	mockObj1.Age = 20
 
-	codeErr := agent.FireWithNoReply("event.test4", mockObj1)
+	codeErr := agent.FireService("event.test4", mockObj1)
 
 	if codeErr != nil {
 		log.Panic(codeErr)

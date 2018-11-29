@@ -25,13 +25,26 @@ type ServiceEvent interface {
 	 * create fire service event object , but the object is not runt
 	 * It could be run when the future is called by await
 	 * default is 100 milion seonc
+	 * @deplecated
 	 */
-	Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (Future, errors.CodeError)
+	//Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (Future, errors.CodeError)
 
 	/**
 	 * create fire servic event object without no reply after handling
+	 *
+	 * @deplecated
 	 */
-	FireWithNoReply(serviceId string, runtimeArgs interface{}) errors.CodeError
+	//FireWithNoReply(serviceId string, runtimeArgs interface{}) errors.CodeError
+
+	/**
+	 * fire service in synchronous mode
+	 */
+	FireSyncService(serviceId string, runtimeArgs interface{}, timeout time.Duration, fn func(FutureReturnResult, errors.CodeError))
+
+	/**
+	 * fire service in asynchronous mode
+	 */
+	FireService(serviceId string, runtimeArgs interface{}) error
 }
 
 /**

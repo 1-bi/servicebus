@@ -2,6 +2,8 @@ package test
 
 import (
 	"fmt"
+	"github.com/1-bi/servicebus"
+	"github.com/1-bi/servicebus/errors"
 	rt "github.com/1-bi/servicebus/runtime"
 	"github.com/nats-io/go-nats"
 	"log"
@@ -21,24 +23,10 @@ func Test_Req_Res_Case1(t *testing.T) {
 	var timeout time.Duration
 	timeout = 3 * time.Second
 
-	f, codeErr := agent.Fire("event.req.test1", "hello world , one request ", timeout)
-
-	if codeErr != nil {
-		log.Panic(codeErr)
-	} else {
-
-		codeErr = f.Await()
+	resultRec := func(result servicebus.FutureReturnResult, codeErr errors.CodeError) {
 
 		if codeErr != nil {
-
 			log.Panic(codeErr)
-
-		}
-
-		result, resErr := f.GetResult()
-
-		if resErr != nil {
-			log.Panic(resErr)
 		}
 
 		var resstr string
@@ -49,6 +37,8 @@ func Test_Req_Res_Case1(t *testing.T) {
 		fmt.Println(resstr)
 		fmt.Println(" response result ------------------ ")
 	}
+
+	agent.FireSyncService("event.req.test1", "hello world , one request ", timeout, resultRec)
 
 }
 
@@ -61,24 +51,10 @@ func Test_Req_Res_Case2(t *testing.T) {
 	var timeout time.Duration
 	timeout = 3 * time.Second
 
-	f, codeErr := agent.Fire("event.req.test2", 10001, timeout)
-
-	if codeErr != nil {
-		log.Panic(codeErr)
-	} else {
-
-		codeErr = f.Await()
+	resultRec := func(result servicebus.FutureReturnResult, codeErr errors.CodeError) {
 
 		if codeErr != nil {
-
 			log.Panic(codeErr)
-
-		}
-
-		result, resErr := f.GetResult()
-
-		if resErr != nil {
-			log.Panic(resErr)
 		}
 
 		var resstr string
@@ -89,6 +65,9 @@ func Test_Req_Res_Case2(t *testing.T) {
 		fmt.Println(resstr)
 		fmt.Println(" response result ------------------ ")
 	}
+
+	agent.FireSyncService("event.req.test2", 10001, timeout, resultRec)
+
 }
 
 func Test_Req_Res_Case3(t *testing.T) {
@@ -103,24 +82,10 @@ func Test_Req_Res_Case3(t *testing.T) {
 	baseMap := make(map[string]string, 0)
 	baseMap["testkey1"] = "testvalue1"
 
-	f, codeErr := agent.Fire("event.req.test3", baseMap, timeout)
-
-	if codeErr != nil {
-		log.Panic(codeErr)
-	} else {
-
-		codeErr = f.Await()
+	resultRec := func(result servicebus.FutureReturnResult, codeErr errors.CodeError) {
 
 		if codeErr != nil {
-
 			log.Panic(codeErr)
-
-		}
-
-		result, resErr := f.GetResult()
-
-		if resErr != nil {
-			log.Panic(resErr)
 		}
 
 		var resstr string
@@ -131,6 +96,9 @@ func Test_Req_Res_Case3(t *testing.T) {
 		fmt.Println(resstr)
 		fmt.Println(" response result ------------------ ")
 	}
+
+	agent.FireSyncService("event.req.test3", baseMap, timeout, resultRec)
+
 }
 
 func Test_Req_Res_Case4(t *testing.T) {
@@ -146,24 +114,10 @@ func Test_Req_Res_Case4(t *testing.T) {
 	mockObj1.Name = "Hello, good boy."
 	mockObj1.Age = 20
 
-	f, codeErr := agent.Fire("event.req.test4", mockObj1, timeout)
-
-	if codeErr != nil {
-		log.Panic(codeErr)
-	} else {
-
-		codeErr = f.Await()
+	resultRec := func(result servicebus.FutureReturnResult, codeErr errors.CodeError) {
 
 		if codeErr != nil {
-
 			log.Panic(codeErr)
-
-		}
-
-		result, resErr := f.GetResult()
-
-		if resErr != nil {
-			log.Panic(resErr)
 		}
 
 		var resstr string
@@ -174,4 +128,7 @@ func Test_Req_Res_Case4(t *testing.T) {
 		fmt.Println(resstr)
 		fmt.Println(" response result ------------------ ")
 	}
+
+	agent.FireSyncService("event.req.test4", mockObj1, timeout, resultRec)
+
 }

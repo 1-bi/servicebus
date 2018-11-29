@@ -82,9 +82,39 @@ func (this *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, ti
 	return f, nil
 }
 
-func (this *baseServiceAgent) FireWithNoReply(serviceId string, runtimeArgs interface{}) errors.CodeError {
+/**
+ *
+ */
+func (this *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs interface{}, timeout time.Duration, fn func(servicebus.FutureReturnResult, errors.CodeError)) {
 
-	// --- use public handle --
+	// --- check object ---
+
+	// ---- create request msg ----
+	reqmsg := models.NewRequestMsg()
+	reqmsg.Id = serviceId
+	reqmsg.Params = runtimeArgs
+
+	// ---- create current event ---
+	f := createBaseFuture(this.natsUrl)
+
+	// ---- define timeout ----
+	f.prepareRequest(this.name, reqmsg, timeout)
+
+	codeErr := f.Await()
+
+	if codeErr != nil {
+		fn(nil, codeErr)
+	}
+	result, resErr := f.GetResult()
+
+	fn(result, resErr)
+
+}
+
+/**
+ *
+ */
+func (this *baseServiceAgent) FireService(serviceId string, runtimeArgs interface{}) error {
 
 	// ---- create request msg ----
 	reqmsg := models.NewRequestMsg()
