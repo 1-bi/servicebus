@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"github.com/1-bi/servicebus"
-	"github.com/1-bi/servicebus/errors"
+	"github.com/1-bi/uerrors"
 	"github.com/vmihailenco/msgpack"
 	"reflect"
 )
@@ -14,7 +14,7 @@ import (
  */
 type baseFutureReturnResult struct {
 	state   int8
-	resErrs map[string]errors.CodeError
+	resErrs map[string]uerrors.CodeError
 	resRes  map[string][]byte
 }
 
@@ -28,14 +28,14 @@ func (this *baseFutureReturnResult) State() int8 {
 /**
  *  return all error from service event running
  */
-func (this *baseFutureReturnResult) Errors(procName string) errors.CodeError {
+func (this *baseFutureReturnResult) Errors(procName string) uerrors.CodeError {
 	return this.resErrs[procName]
 }
 
 /**
  * rturn all return Results
  */
-func (this *baseFutureReturnResult) ReturnResults(procName string, inReturn interface{}) errors.CodeError {
+func (this *baseFutureReturnResult) ReturnResults(procName string, inReturn interface{}) uerrors.CodeError {
 
 	// ---- validate type ---
 	if reflect.TypeOf(inReturn).Kind() != reflect.Ptr {
@@ -51,7 +51,7 @@ func (this *baseFutureReturnResult) ReturnResults(procName string, inReturn inte
 /**
  * get the first error directly
  */
-func (this *baseFutureReturnResult) Error() errors.CodeError {
+func (this *baseFutureReturnResult) Error() uerrors.CodeError {
 	// --- get the first error --
 	for _, errObj := range this.resErrs {
 		return errObj
@@ -62,7 +62,7 @@ func (this *baseFutureReturnResult) Error() errors.CodeError {
 /**
  * get the first result directly
  */
-func (this *baseFutureReturnResult) ReturnResult(inReturn interface{}) errors.CodeError {
+func (this *baseFutureReturnResult) ReturnResult(inReturn interface{}) uerrors.CodeError {
 
 	// ---- validate type ---
 	if reflect.TypeOf(inReturn).Kind() != reflect.Ptr {

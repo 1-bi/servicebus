@@ -1,14 +1,14 @@
 package models
 
 import (
-	"github.com/1-bi/servicebus/errors"
+	"github.com/1-bi/uerrors"
 	"github.com/vmihailenco/msgpack"
 	"log"
 )
 
 type BaseResult struct {
 	ResultRef []byte
-	Err       errors.CodeError
+	Err       uerrors.CodeError
 }
 
 func (this *BaseResult) Complete(objref interface{}) {
@@ -21,7 +21,7 @@ func (this *BaseResult) Complete(objref interface{}) {
 	this.ResultRef = bContent
 }
 
-func (this *BaseResult) Fail(err errors.CodeError) {
+func (this *BaseResult) Fail(err uerrors.CodeError) {
 	this.Err = err
 }
 

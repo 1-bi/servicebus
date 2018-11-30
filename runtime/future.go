@@ -2,9 +2,9 @@ package runtime
 
 import (
 	"github.com/1-bi/servicebus"
-	"github.com/1-bi/servicebus/errors"
 	"github.com/1-bi/servicebus/models"
 	"github.com/1-bi/servicebus/schema"
+	"github.com/1-bi/uerrors"
 	"github.com/nats-io/go-nats"
 	"github.com/vmihailenco/msgpack"
 	"log"
@@ -51,7 +51,7 @@ func (this *baseFuture) GetStatus() int8 {
 /**
  * sent the message to mq in this function
  */
-func (this *baseFuture) Await() (coreErr errors.CodeError) {
+func (this *baseFuture) Await() (coreErr uerrors.CodeError) {
 
 	// --- request message conver to reqmsg ---
 	reqMsg := new(schema.ReqMsg)
@@ -64,21 +64,21 @@ func (this *baseFuture) Await() (coreErr errors.CodeError) {
 	byteData, err := reqMsg.Marshal(nil)
 	if err != nil {
 		// --- create new error
-		coreErr = errors.NewCodeError("E0000015", err.Error())
+		coreErr = uerrors.NewCodeError("E0000015", err.Error())
 		log.Fatalf("Error in Request: %v\n", err)
 	} else {
 
 		// ---- run sent request ---
 		err := this.sentAndReply(this.subjectChann, byteData, this.timeout)
 		if err != nil {
-			coreErr = errors.NewCodeErrorWithPrefix("servbus", "errInSentAndReply", err.Error())
+			coreErr = uerrors.NewCodeErrorWithPrefix("servbus", "errInSentAndReply", err.Error())
 		}
 	}
 
 	return coreErr
 }
 
-func (this *baseFuture) GetResult() (servicebus.FutureReturnResult, errors.CodeError) {
+func (this *baseFuture) GetResult() (servicebus.FutureReturnResult, uerrors.CodeError) {
 
 	if this.resultMap == nil {
 		return nil, servicebus.Err000002.Build()
@@ -139,7 +139,7 @@ func (this *baseFuture) convertResultMap(resultItems []*schema.ResultItem) map[s
 		if item.Result.Err != nil {
 
 			codeErrModel := resultModel.Err
-			codeErr := errors.NewCodeErrorWithPrefix(codeErrModel.Prefix, codeErrModel.Code, codeErrModel.MsgBody)
+			codeErr := uerrors.NewCodeErrorWithPrefix(codeErrModel.Prefix, codeErrModel.Code, codeErrModel.MsgBody)
 
 			baseResult.Fail(codeErr)
 
@@ -220,7 +220,7 @@ func (this *baseFuture) newFutureReturnResult(resmap map[string]*models.BaseResu
 
 	baseFutureRetRes := new(baseFutureReturnResult)
 
-	resErrs := make(map[string]errors.CodeError, 0)
+	resErrs := make(map[string]uerrors.CodeError, 0)
 	resRes := make(map[string][]byte, 0)
 
 	size := len(resmap)

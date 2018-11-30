@@ -3,9 +3,9 @@ package runtime
 import (
 	"fmt"
 	"github.com/1-bi/servicebus"
-	"github.com/1-bi/servicebus/errors"
 	"github.com/1-bi/servicebus/models"
 	"github.com/1-bi/servicebus/schema"
+	"github.com/1-bi/uerrors"
 	"sync"
 	"time"
 )
@@ -64,7 +64,7 @@ func (this *baseServiceAgent) On(serviceId string, fn func(servicebus.ServiceEve
 /**
  *
  */
-func (this *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (servicebus.Future, errors.CodeError) {
+func (this *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (servicebus.Future, uerrors.CodeError) {
 
 	// --- check object ---
 
@@ -85,7 +85,7 @@ func (this *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, ti
 /**
  *
  */
-func (this *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs interface{}, timeout time.Duration, fn func(servicebus.FutureReturnResult, errors.CodeError)) {
+func (this *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs interface{}, timeout time.Duration, fn func(servicebus.FutureReturnResult, uerrors.CodeError)) {
 
 	// --- check object ---
 
@@ -128,7 +128,7 @@ func (this *baseServiceAgent) FireService(serviceId string, runtimeArgs interfac
 	err := f.publishRequest(this.name, reqmsg)
 
 	if err != nil {
-		return errors.NewCodeErrorWithPrefix("splider", "0000003000", err.Error())
+		return uerrors.NewCodeErrorWithPrefix("splider", "0000003000", err.Error())
 	}
 
 	return nil

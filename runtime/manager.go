@@ -3,9 +3,9 @@ package runtime
 import (
 	"fmt"
 	"github.com/1-bi/servicebus"
-	"github.com/1-bi/servicebus/errors"
 	"github.com/1-bi/servicebus/models"
 	"github.com/1-bi/servicebus/schema"
+	"github.com/1-bi/uerrors"
 	"github.com/nats-io/go-nats"
 	"github.com/vmihailenco/msgpack"
 	"log"
@@ -58,7 +58,7 @@ func (this *baseServiceManager) On(serviceId string, fn func(servicebus.ServiceE
 /**
  *
  */
-func (this *baseServiceManager) Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (servicebus.Future, errors.CodeError) {
+func (this *baseServiceManager) Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (servicebus.Future, uerrors.CodeError) {
 
 	// --- check object ---
 
@@ -76,7 +76,7 @@ func (this *baseServiceManager) Fire(serviceId string, runtimeArgs interface{}, 
 	return f, nil
 }
 
-func (this *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs interface{}) errors.CodeError {
+func (this *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs interface{}) uerrors.CodeError {
 
 	// --- use public handle --
 
@@ -92,7 +92,7 @@ func (this *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs in
 	err := f.publishRequest(this.name, reqmsg)
 
 	if err != nil {
-		return errors.NewCodeErrorWithPrefix("splider", "0000003000", err.Error())
+		return uerrors.NewCodeErrorWithPrefix("splider", "0000003000", err.Error())
 	}
 
 	return nil
@@ -187,7 +187,7 @@ func (this *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultIt
 
 				if err != nil {
 
-					codeErr := errors.NewCodeErrorWithPrefix("servbus", "errUnmarshalMessageToBean", "Convert bean error : "+err.Error())
+					codeErr := uerrors.NewCodeErrorWithPrefix("servbus", "errUnmarshalMessageToBean", "Convert bean error : "+err.Error())
 
 					fmt.Println(codeErr)
 

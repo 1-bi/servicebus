@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"github.com/1-bi/servicebus"
-	"github.com/1-bi/servicebus/errors"
+	"github.com/1-bi/uerrors"
 	"log"
 	"reflect"
 )
@@ -12,7 +12,7 @@ import (
  */
 type eventHandlerImpl struct {
 	bindRequestObj interface{}
-	bindProcessor  func(bc servicebus.EventbusContext) errors.CodeError
+	bindProcessor  func(bc servicebus.EventbusContext) uerrors.CodeError
 	serviceManager *baseServiceManager
 	eventBusCtx    *eventbusContextImpl
 }
@@ -21,7 +21,7 @@ func (this *eventHandlerImpl) ConvertRequestBody(bingObjFn func() interface{}) {
 	this.bindRequestObj = bingObjFn()
 }
 
-func (this *eventHandlerImpl) Process(processFn func(bc servicebus.EventbusContext) errors.CodeError) {
+func (this *eventHandlerImpl) Process(processFn func(bc servicebus.EventbusContext) uerrors.CodeError) {
 	this.bindProcessor = processFn
 }
 

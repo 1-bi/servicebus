@@ -16,6 +16,8 @@ import (
  * --------------------------------- *
  */
 const (
+	PREFIX = "servicebus"
+
 	STATUS_DONE    int8 = 5
 	STATUS_RUNNING int8 = 1
 	STATUS_CANNEL  int8 = 3
