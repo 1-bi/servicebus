@@ -20,9 +20,10 @@ import (
  */
 type baseServiceManager struct {
 	baseServiceAgent
+	natsUrl string
 }
 
-func NewServiceManager() (servicebus.ServiceManager, error) {
+func NewServiceManager(natsUrl string) (servicebus.ServiceManager, error) {
 
 	bsm := new(baseServiceManager)
 
@@ -32,8 +33,8 @@ func NewServiceManager() (servicebus.ServiceManager, error) {
 	//bsm.msgencoder = mpe
 
 	holder := make(map[string][]func(servicebus.ServiceEventHandler), 0)
-
 	bsm.fnHolder = holder
+	bsm.natsUrl = natsUrl
 
 	return bsm, nil
 }
@@ -67,7 +68,7 @@ func (this *baseServiceManager) Fire(serviceId string, runtimeArgs interface{}, 
 	reqmsg.Params = runtimeArgs
 
 	// ---- create current event ---
-	f := createBaseFuture(nats.DefaultURL)
+	f := createBaseFuture(this.natsUrl)
 
 	// ---- define timeout ----
 	f.prepareRequest(this.name, reqmsg, timeout)
@@ -104,7 +105,7 @@ func (this *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs in
  */
 func (this *baseServiceManager) ListenServices() error {
 
-	nc, err := nats.Connect(nats.DefaultURL)
+	nc, err := nats.Connect(this.natsUrl)
 	if err != nil {
 		log.Fatalf("Can't connect: %v\n", err)
 	}
