@@ -3,8 +3,8 @@ package test
 import (
 	"fmt"
 	"github.com/1-bi/servicebus"
-	"github.com/1-bi/servicebus/errors"
 	rt "github.com/1-bi/servicebus/runtime"
+	"github.com/1-bi/uerrors"
 	"github.com/nats-io/go-nats"
 	"log"
 	"testing"
@@ -22,7 +22,7 @@ func Test_Delegate_Case1(t *testing.T) {
 	var timeout time.Duration
 	timeout = 3 * time.Second
 
-	resultRec := func(result servicebus.FutureReturnResult, codeErr errors.CodeError) {
+	resultRec := func(result servicebus.FutureReturnResult, codeErr uerrors.CodeError) {
 
 		if codeErr != nil {
 			log.Panic(codeErr)

@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/1-bi/servicebus"
-	"github.com/1-bi/servicebus/errors"
+	"github.com/1-bi/uerrors"
 )
 
 /**
@@ -19,7 +19,7 @@ func (this *MockHandlerBean1) EventAction1(handler servicebus.ServiceEventHandle
 		return &reqData
 	})
 
-	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+	handler.Process(func(bc servicebus.EventbusContext) uerrors.CodeError {
 
 		reqData := bc.GetRequestData()
 
@@ -40,7 +40,7 @@ func (this *MockHandlerBean1) EventAction2(handler servicebus.ServiceEventHandle
 		return &reqData
 	})
 
-	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+	handler.Process(func(bc servicebus.EventbusContext) uerrors.CodeError {
 		reqData := bc.GetRequestData()
 
 		fmt.Println(" request data2 : ")
@@ -59,7 +59,7 @@ func (this *MockHandlerBean1) EventAction3(handler servicebus.ServiceEventHandle
 		return &reqData
 	})
 
-	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+	handler.Process(func(bc servicebus.EventbusContext) uerrors.CodeError {
 		reqData := bc.GetRequestData()
 
 		fmt.Println(" request data3 : ")
@@ -80,7 +80,7 @@ func (this *MockHandlerBean1) EventAction4(handler servicebus.ServiceEventHandle
 		return &reqData
 	})
 
-	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+	handler.Process(func(bc servicebus.EventbusContext) uerrors.CodeError {
 		reqData := bc.GetRequestData()
 
 		fmt.Println(" request data4 : ")

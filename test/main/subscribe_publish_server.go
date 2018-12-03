@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/1-bi/servicebus"
-	"github.com/1-bi/servicebus/errors"
 	rt "github.com/1-bi/servicebus/runtime"
 	"github.com/1-bi/servicebus/test"
+	"github.com/1-bi/uerrors"
+	"github.com/nats-io/go-nats"
 	"log"
 	"runtime"
 )
@@ -14,7 +15,7 @@ func main() {
 
 	// ---- create service bus manager ----
 
-	serviceManager, err := rt.NewServiceManager()
+	serviceManager, err := rt.NewServiceManager(nats.DefaultURL)
 
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +41,7 @@ func test1Handler(handler servicebus.ServiceEventHandler) {
 		return &reqData
 	})
 
-	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+	handler.Process(func(bc servicebus.EventbusContext) uerrors.CodeError {
 		reqData := bc.GetRequestData()
 
 		fmt.Println(" request data : ")
@@ -57,7 +58,7 @@ func test2Handler(handler servicebus.ServiceEventHandler) {
 		return &reqData
 	})
 
-	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+	handler.Process(func(bc servicebus.EventbusContext) uerrors.CodeError {
 		reqData := bc.GetRequestData()
 
 		fmt.Println(" request data2 : ")
@@ -74,7 +75,7 @@ func test3Handler(handler servicebus.ServiceEventHandler) {
 		return &reqData
 	})
 
-	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+	handler.Process(func(bc servicebus.EventbusContext) uerrors.CodeError {
 		reqData := bc.GetRequestData()
 
 		fmt.Println(" request data3 : ")
@@ -90,7 +91,7 @@ func test4Handler(handler servicebus.ServiceEventHandler) {
 		return &reqData
 	})
 
-	handler.Process(func(bc servicebus.EventbusContext) errors.CodeError {
+	handler.Process(func(bc servicebus.EventbusContext) uerrors.CodeError {
 		reqData := bc.GetRequestData()
 
 		fmt.Println(" request data4 : ")

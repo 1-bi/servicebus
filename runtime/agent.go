@@ -6,6 +6,7 @@ import (
 	"github.com/1-bi/servicebus/models"
 	"github.com/1-bi/servicebus/schema"
 	"github.com/1-bi/uerrors"
+	"reflect"
 	"sync"
 	"time"
 )
@@ -57,6 +58,13 @@ func (this *baseServiceAgent) On(serviceId string, fn func(servicebus.ServiceEve
 	// ---- update service function mapping ---
 
 	this.fnHolder[serviceId] = existedFn
+
+	// --- log the message for define ---
+	refevent := reflect.ValueOf(fn).String()
+
+	fmt.Println(refevent)
+
+	//log.Printf("Register event :["+ serviceId +"] " + )
 
 	return nil
 }

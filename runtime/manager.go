@@ -11,6 +11,7 @@ import (
 	"log"
 	"reflect"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -49,9 +50,12 @@ func (this *baseServiceManager) On(serviceId string, fn func(servicebus.ServiceE
 	existedFn = append(existedFn, fn)
 
 	// ---- update service function mapping ---
-
 	this.fnHolder[serviceId] = existedFn
 
+	refevent := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+
+	msg := strings.Join([]string{"Register event [", serviceId, "], function name [", refevent, "]."}, "")
+	log.Println(msg)
 	return nil
 }
 

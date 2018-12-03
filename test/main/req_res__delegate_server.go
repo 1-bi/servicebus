@@ -4,6 +4,7 @@ import (
 	"github.com/1-bi/servicebus"
 	rt "github.com/1-bi/servicebus/runtime"
 	"github.com/1-bi/servicebus/test"
+	"github.com/nats-io/go-nats"
 	"log"
 	"runtime"
 )
@@ -12,7 +13,7 @@ func main() {
 
 	// ---- create service bus manager ----
 
-	serviceManager, err := rt.NewServiceManager()
+	serviceManager, err := rt.NewServiceManager(nats.DefaultURL)
 
 	if err != nil {
 		log.Fatal(err)
