@@ -39,20 +39,19 @@ func Test_Delegate_Case1(t *testing.T) {
 
 	agent.FireSyncService("event.req.test1", "hello world , one request ", timeout, resultRec)
 
-	/*
+}
 
-		natsUrl := nats.DefaultURL
+func Test_Delegate_Case2(t *testing.T) {
 
-		agent := rt.NewServiceAgent(natsUrl)
+	// --- create delete object ---
 
-		mockObj1 := new(MockObj1)
-		mockObj1.Name = "Hello, good boy."
-		mockObj1.Age = 20
+	natsUrl := nats.DefaultURL
 
-		codeErr := agent.FireWithNoReply("event.test4", mockObj1)
+	agent := rt.NewServiceAgent(natsUrl)
 
-		if codeErr != nil {
-			log.Panic(codeErr)
-		}
-	*/
+	//var timeout time.Duration
+	//timeout = 3 * time.Second
+
+	agent.FireService("event.req.test1", "hello world , one request ")
+
 }

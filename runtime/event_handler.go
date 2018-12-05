@@ -30,9 +30,17 @@ func (this *eventHandlerImpl) doProcess() {
 	// request data interface
 	var requestData interface{}
 
+	typ := reflect.TypeOf(this.bindRequestObj)
+
 	// --- assign  new value object ----
-	if reflect.TypeOf(this.bindRequestObj).Kind() == reflect.Ptr {
-		requestData = reflect.ValueOf(this.bindRequestObj).Elem()
+	if typ.Kind() == reflect.Ptr {
+		requestData = typ.Elem()
+	} else if typ.Kind() == reflect.Struct {
+		if typ.String() == "reflect.Value" {
+			requestData = this.bindRequestObj.(reflect.Value).Interface()
+		} else {
+			requestData = this.bindRequestObj
+		}
 	} else {
 		requestData = this.bindRequestObj
 	}
