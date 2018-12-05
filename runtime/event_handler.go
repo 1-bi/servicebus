@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"fmt"
 	"github.com/1-bi/servicebus"
 	"github.com/1-bi/uerrors"
 	"log"
@@ -35,17 +34,8 @@ func (this *eventHandlerImpl) doProcess() {
 
 	// --- assign  new value object ----
 	if typ.Kind() == reflect.Ptr {
-		requestData = typ.Elem()
-	} else if typ.Kind() == reflect.Struct {
-		if typ.String() == "reflect.Value" {
-			requestData = this.bindRequestObj.(reflect.Value).Interface()
-
-			fmt.Println("out put ------------- value ")
-			fmt.Println(requestData)
-
-		} else {
-			requestData = this.bindRequestObj
-		}
+		requestData = reflect.ValueOf(this.bindRequestObj).Elem()
+		requestData = requestData.(reflect.Value).Interface()
 	} else {
 		requestData = this.bindRequestObj
 	}
