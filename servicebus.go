@@ -45,6 +45,9 @@ type ServiceAgent interface {
 type ServiceManager interface {
 	ServiceEvent
 
+	// set the message encoder
+	SetMsgEncoder(msgEncoder MessageEncoder) error
+
 	/**
 	 * boot listen service
 	 */

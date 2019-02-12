@@ -21,7 +21,8 @@ import (
  */
 type baseServiceManager struct {
 	baseServiceAgent
-	natsUrl string
+	natsUrl    string
+	msgEncoder servicebus.MessageEncoder
 }
 
 func NewServiceManager(natsUrl string) (servicebus.ServiceManager, error) {
@@ -38,6 +39,11 @@ func NewServiceManager(natsUrl string) (servicebus.ServiceManager, error) {
 	bsm.natsUrl = natsUrl
 
 	return bsm, nil
+}
+
+func (this *baseServiceManager) SetMsgEncoder(msgEncoder servicebus.MessageEncoder) error {
+
+	return nil
 }
 
 /**
