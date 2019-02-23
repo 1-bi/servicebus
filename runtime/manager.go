@@ -5,9 +5,11 @@ import (
 	"github.com/1-bi/servicebus"
 	"github.com/1-bi/servicebus/models"
 	"github.com/1-bi/servicebus/schema"
+	"github.com/1-bi/servicebus/validation"
 	"github.com/1-bi/uerrors"
 	"github.com/nats-io/go-nats"
 	"github.com/vmihailenco/msgpack"
+	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"reflect"
 	"runtime"
@@ -23,6 +25,7 @@ type baseServiceManager struct {
 	baseServiceAgent
 	natsUrl    string
 	msgEncoder servicebus.MessageEncoder
+	validate   *validator.Validate
 }
 
 func NewServiceManager(natsUrl string) (servicebus.ServiceManager, error) {
@@ -37,26 +40,51 @@ func NewServiceManager(natsUrl string) (servicebus.ServiceManager, error) {
 	holder := make(map[string][]func(servicebus.ServiceEventHandler), 0)
 	bsm.fnHolder = holder
 	bsm.natsUrl = natsUrl
+	bsm.validate = validator.New()
 
 	return bsm, nil
 }
 
-func (this *baseServiceManager) SetMsgEncoder(msgEncoder servicebus.MessageEncoder) error {
+// SetConfig init the servicebus instance
+func (myself *baseServiceManager) SetConfig(conf *servicebus.Config) error {
+
+	// --- check the config envirment ----
+	encoder := conf.GetEncoder()
+
+	err := myself.validateMessageEncoder(encoder)
+
+	return err
+}
+
+func (myself *baseServiceManager) validateMessageEncoder(encoder servicebus.MessageEncoder) error {
+
+	type MessageEncodertype struct {
+		encoderInst interface{} `validate:"validate-msgencoder"`
+	}
+
+	met := MessageEncodertype{}
+	myself.validate.RegisterValidation("validate-msgencoder", validation.ValidateMsgEncoderType)
+
+	err := myself.validate.Struct(met)
+	if err != nil {
+		fmt.Printf("Err(s):\n%+v\n", err)
+	}
 
 	return nil
+
 }
 
 /**
  * define base global service handle
  */
-func (this *baseServiceManager) On(serviceId string, fn func(servicebus.ServiceEventHandler)) error {
+func (myself *baseServiceManager) On(serviceId string, fn func(servicebus.ServiceEventHandler)) error {
 
-	existedFn := this.fnHolder[serviceId]
+	existedFn := myself.fnHolder[serviceId]
 
 	existedFn = append(existedFn, fn)
 
 	// ---- update service function mapping ---
-	this.fnHolder[serviceId] = existedFn
+	myself.fnHolder[serviceId] = existedFn
 
 	refevent := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
 
@@ -68,7 +96,7 @@ func (this *baseServiceManager) On(serviceId string, fn func(servicebus.ServiceE
 /**
  *
  */
-func (this *baseServiceManager) Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (servicebus.Future, uerrors.CodeError) {
+func (myself *baseServiceManager) Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (servicebus.Future, uerrors.CodeError) {
 
 	// --- check object ---
 
@@ -78,15 +106,15 @@ func (this *baseServiceManager) Fire(serviceId string, runtimeArgs interface{}, 
 	reqmsg.Params = runtimeArgs
 
 	// ---- create current event ---
-	f := createBaseFuture(this.natsUrl)
+	f := createBaseFuture(myself.natsUrl)
 
 	// ---- define timeout ----
-	f.prepareRequest(this.name, reqmsg, timeout)
+	f.prepareRequest(myself.name, reqmsg, timeout)
 
 	return f, nil
 }
 
-func (this *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs interface{}) uerrors.CodeError {
+func (myself *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs interface{}) uerrors.CodeError {
 
 	// --- use public handle --
 
@@ -99,7 +127,7 @@ func (this *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs in
 	f := createBaseFuture(nats.DefaultURL)
 
 	// ---- define timeout ----
-	err := f.publishRequest(this.name, reqmsg)
+	err := f.publishRequest(myself.name, reqmsg)
 
 	if err != nil {
 		return uerrors.NewCodeErrorWithPrefix("splider", "0000003000", err.Error())
@@ -113,16 +141,16 @@ func (this *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs in
  * start up boot and listen service
  * Listen service use default request / rply mode
  */
-func (this *baseServiceManager) ListenServices() error {
+func (myself *baseServiceManager) ListenServices() error {
 
-	nc, err := nats.Connect(this.natsUrl)
+	nc, err := nats.Connect(myself.natsUrl)
 	if err != nil {
 		log.Fatalf("Can't connect: %v\n", err)
 	}
 
 	//queue := "default"
 
-	subj := this.name
+	subj := myself.name
 
 	nc.Subscribe(subj, func(msg *nats.Msg) {
 
@@ -132,10 +160,10 @@ func (this *baseServiceManager) ListenServices() error {
 		reqMsg.Unmarshal(msg.Data)
 
 		// --- get service process by service id ----
-		resmap := this.doRequest(reqMsg)
+		resmap := myself.doRequest(reqMsg)
 
 		// --- result map ---
-		resMsg := this.doResponse(reqMsg.Id, resmap)
+		resMsg := myself.doResponse(reqMsg.Id, resmap)
 
 		byteContent, err := resMsg.Marshal(nil)
 
@@ -161,9 +189,9 @@ func (this *baseServiceManager) ListenServices() error {
 /**
  * execute handler for multi veent
  */
-func (this *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultItem {
+func (myself *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultItem {
 
-	servEventhandlers := this.fnHolder[req.Id]
+	servEventhandlers := myself.fnHolder[req.Id]
 
 	var wg = new(sync.WaitGroup)
 
@@ -184,7 +212,7 @@ func (this *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultIt
 
 			// --- create handler servert handler implement
 			eventHandler := new(eventHandlerImpl)
-			eventHandler.serviceManager = this
+			eventHandler.serviceManager = myself
 
 			// --- predefine handler ----
 			servHandler(eventHandler)
@@ -242,7 +270,7 @@ func (this *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.ResultIt
 
 }
 
-func (this *baseServiceManager) doResponse(serviceId string, resultItems []*schema.ResultItem) *schema.ResMsg {
+func (myself *baseServiceManager) doResponse(serviceId string, resultItems []*schema.ResultItem) *schema.ResMsg {
 
 	// ---- found the result ---
 
