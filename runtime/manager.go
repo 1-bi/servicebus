@@ -49,11 +49,14 @@ func NewServiceManager(natsUrl string) (servicebus.ServiceManager, error) {
 func (myself *baseServiceManager) SetConfig(conf *servicebus.Config) error {
 
 	// --- check the config envirment ----
-	encoder := conf.GetEncoder()
 
-	err := myself.validateMessageEncoder(encoder)
+	err := myself.validateMessageEncoder(conf.GetEncoder())
+	if err != nil {
+		return err
+	}
+	myself.msgEncoder = conf.GetEncoder()
 
-	return err
+	return nil
 }
 
 func (myself *baseServiceManager) validateMessageEncoder(encoder servicebus.MessageEncoder) error {
@@ -153,6 +156,13 @@ func (myself *baseServiceManager) ListenServices() error {
 	subj := myself.name
 
 	nc.Subscribe(subj, func(msg *nats.Msg) {
+
+		// --- get the header flag ---
+		size := len(msg.Data)
+
+		fmt.Println(" content header ")
+		fmt.Println(size)
+		bytes.su
 
 		// ---- convert to req message ---
 		reqMsg := new(schema.ReqMsg)
