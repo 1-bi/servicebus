@@ -26,6 +26,8 @@ type baseServiceAgent struct {
 	fnHolder map[string][]func(servicebus.ServiceEventHandler)
 
 	natsUrl string
+
+	runtimeConf *servicebus.AgentConfig
 }
 
 /**
@@ -33,11 +35,15 @@ type baseServiceAgent struct {
  *  new service agent
  * -------------------------------
  */
+//  NewServiceAgent contruct service bus event
 func NewServiceAgent(connectUrl string) servicebus.ServiceAgent {
 
 	bsa := new(baseServiceAgent)
 	bsa.natsUrl = connectUrl
 	bsa.name = "servicebus"
+
+	// --- define defulat conf
+	bsa.runtimeConf = new(servicebus.AgentConfig)
 
 	holder := make(map[string][]func(servicebus.ServiceEventHandler), 0)
 
@@ -46,18 +52,27 @@ func NewServiceAgent(connectUrl string) servicebus.ServiceAgent {
 	return bsa
 }
 
+func (myself *baseServiceAgent) SetConfig(agentConf *servicebus.AgentConfig) error {
+
+	myself.runtimeConf = agentConf
+
+	// --- ccheck config validate ---
+
+	return nil
+}
+
 /**
  * define base global service handle
  */
-func (this *baseServiceAgent) On(serviceId string, fn func(servicebus.ServiceEventHandler)) error {
+func (myself *baseServiceAgent) On(serviceId string, fn func(servicebus.ServiceEventHandler)) error {
 
-	existedFn := this.fnHolder[serviceId]
+	existedFn := myself.fnHolder[serviceId]
 
 	existedFn = append(existedFn, fn)
 
 	// ---- update service function mapping ---
 
-	this.fnHolder[serviceId] = existedFn
+	myself.fnHolder[serviceId] = existedFn
 
 	// --- log the message for define ---
 	refevent := reflect.ValueOf(fn).String()
@@ -72,7 +87,7 @@ func (this *baseServiceAgent) On(serviceId string, fn func(servicebus.ServiceEve
 /**
  *
  */
-func (this *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (servicebus.Future, uerrors.CodeError) {
+func (myself *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, timeout time.Duration) (servicebus.Future, uerrors.CodeError) {
 
 	// --- check object ---
 
@@ -82,10 +97,10 @@ func (this *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, ti
 	reqmsg.Params = runtimeArgs
 
 	// ---- create current event ---
-	f := createBaseFuture(this.natsUrl)
+	f := createBaseFuture(myself.natsUrl)
 
 	// ---- define timeout ----
-	f.prepareRequest(this.name, reqmsg, timeout)
+	f.prepareRequest(myself.name, reqmsg, timeout)
 
 	return f, nil
 }
@@ -93,7 +108,10 @@ func (this *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, ti
 /**
  *
  */
-func (this *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs interface{}, timeout time.Duration, fn func(servicebus.FutureReturnResult, uerrors.CodeError)) {
+func (myself *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs interface{}, timeout time.Duration, fn func(servicebus.FutureReturnResult, uerrors.CodeError)) {
+
+	// --- check the message encoder ---
+	msgConder := myself.runtimeConf.GetEncoder()
 
 	// --- check object ---
 
@@ -103,10 +121,10 @@ func (this *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs inte
 	reqmsg.Params = runtimeArgs
 
 	// ---- create current event ---
-	f := createBaseFuture(this.natsUrl)
+	f := createBaseFuture(myself.natsUrl)
 
 	// ---- define timeout ----
-	f.prepareRequest(this.name, reqmsg, timeout)
+	f.prepareRequest(myself.name, reqmsg, timeout)
 
 	codeErr := f.Await()
 
@@ -122,7 +140,7 @@ func (this *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs inte
 /**
  *
  */
-func (this *baseServiceAgent) FireService(serviceId string, runtimeArgs interface{}) error {
+func (myself *baseServiceAgent) FireService(serviceId string, runtimeArgs interface{}) error {
 
 	// ---- create request msg ----
 	reqmsg := models.NewRequestMsg()
@@ -130,10 +148,10 @@ func (this *baseServiceAgent) FireService(serviceId string, runtimeArgs interfac
 	reqmsg.Params = runtimeArgs
 
 	// ---- create current event ---
-	f := createBaseFuture(this.natsUrl)
+	f := createBaseFuture(myself.natsUrl)
 
 	// ---- define timeout ----
-	err := f.publishRequest(this.name, reqmsg)
+	err := f.publishRequest(myself.name, reqmsg)
 
 	if err != nil {
 		return uerrors.NewCodeErrorWithPrefix("splider", "0000003000", err.Error())
@@ -146,9 +164,9 @@ func (this *baseServiceAgent) FireService(serviceId string, runtimeArgs interfac
 /**
  * execute handler for multi veent
  */
-func (this *baseServiceAgent) doRequest(req *schema.ReqMsg) []*schema.ResultItem {
+func (myself *baseServiceAgent) doRequest(req *schema.ReqMsg) []*schema.ResultItem {
 
-	eventFunction := this.fnHolder[req.Id]
+	eventFunction := myself.fnHolder[req.Id]
 
 	var wg = new(sync.WaitGroup)
 
@@ -190,7 +208,7 @@ func (this *baseServiceAgent) doRequest(req *schema.ReqMsg) []*schema.ResultItem
 				objTypeName := servicebus.FunctypeInObject(servHandler)
 
 				// --- create local bus context ---
-				eventbusCtx := newEventbusContextImpl(bindRef, this)
+				eventbusCtx := newEventbusContextImpl(bindRef, myself)
 
 				err := servHandler.Process(eventbusCtx)
 
@@ -233,7 +251,7 @@ func (this *baseServiceAgent) doRequest(req *schema.ReqMsg) []*schema.ResultItem
 
 }
 
-func (this *baseServiceAgent) doResponse(serviceId string, resultItems []*schema.ResultItem) *schema.ResMsg {
+func (myself *baseServiceAgent) doResponse(serviceId string, resultItems []*schema.ResultItem) *schema.ResMsg {
 
 	// ---- found the result ---
 

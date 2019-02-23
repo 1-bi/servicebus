@@ -16,10 +16,10 @@ import (
 func main() {
 
 	// --- set config envirment ---
-	var conf *servicebus.Config
-	conf = new(servicebus.Config)
+	var conf *servicebus.ServerConfig
+	conf = new(servicebus.ServerConfig)
 
-	conf.SetEncoder((*encoder.MsgPackEncoder)(&encoder.MsgPackEncoder{}))
+	conf.SetEncoder((&encoder.GencodeEncoder{}))
 
 	// ---- create service bus manager ----
 	serviceManager, err := rt.NewServiceManager(nats.DefaultURL)

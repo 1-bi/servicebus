@@ -37,6 +37,9 @@ type ServiceEvent interface {
  */
 type ServiceAgent interface {
 	ServiceEvent
+
+	// SetConfig add base config and check config
+	SetConfig(conf *AgentConfig) error
 }
 
 /**
@@ -46,7 +49,7 @@ type ServiceManager interface {
 	ServiceEvent
 
 	// SetConfig add base config and check config
-	SetConfig(conf *Config) error
+	SetConfig(conf *ServerConfig) error
 
 	/**
 	 * boot listen service

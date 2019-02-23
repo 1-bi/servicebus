@@ -39,25 +39,30 @@ type baseFuture struct {
 	reqMsg        *models.RequestMsg
 	timeout       time.Duration
 	resultMap     map[string]*models.BaseResult
+	encoder       servicebus.MessageEncoder
+}
+
+func (myself *baseFuture) SetEncoder(encoder servicebus.MessageEncoder) {
+	myself.encoder = encoder
 }
 
 /**
  * return current future status
  */
-func (this *baseFuture) GetStatus() int8 {
+func (myself *baseFuture) GetStatus() int8 {
 	return 0
 }
 
 /**
  * sent the message to mq in this function
  */
-func (this *baseFuture) Await() (coreErr uerrors.CodeError) {
+func (myself *baseFuture) Await() (coreErr uerrors.CodeError) {
 
 	// --- request message conver to reqmsg ---
 	reqMsg := new(schema.ReqMsg)
-	reqMsg.Id = this.reqMsg.Id
+	reqMsg.Id = myself.reqMsg.Id
 
-	paramByteData, err := msgpack.Marshal(this.reqMsg.Params)
+	paramByteData, err := msgpack.Marshal(myself.reqMsg.Params)
 	reqMsg.Params = paramByteData
 
 	// --- contruct request message ---
@@ -69,7 +74,7 @@ func (this *baseFuture) Await() (coreErr uerrors.CodeError) {
 	} else {
 
 		// ---- run sent request ---
-		err := this.sentAndReply(this.subjectChann, byteData, this.timeout)
+		err := myself.sentAndReply(myself.subjectChann, byteData, myself.timeout)
 		if err != nil {
 			coreErr = uerrors.NewCodeErrorWithPrefix("servbus", "errInSentAndReply", err.Error())
 		}
@@ -78,14 +83,14 @@ func (this *baseFuture) Await() (coreErr uerrors.CodeError) {
 	return coreErr
 }
 
-func (this *baseFuture) GetResult() (servicebus.FutureReturnResult, uerrors.CodeError) {
+func (myself *baseFuture) GetResult() (servicebus.FutureReturnResult, uerrors.CodeError) {
 
-	if this.resultMap == nil {
+	if myself.resultMap == nil {
 		return nil, servicebus.Err000002.Build()
 	}
 
 	// ---- check data error
-	baseFuReResult := this.newFutureReturnResult(this.resultMap)
+	baseFuReResult := myself.newFutureReturnResult(myself.resultMap)
 
 	return baseFuReResult, nil
 }
@@ -93,9 +98,9 @@ func (this *baseFuture) GetResult() (servicebus.FutureReturnResult, uerrors.Code
 /**
  * sent subject request
  */
-func (this *baseFuture) sentAndReply(subject string, content []byte, timeout time.Duration) error {
+func (myself *baseFuture) sentAndReply(subject string, content []byte, timeout time.Duration) error {
 
-	nc, err := nats.Connect(this.mqbrokerUrl)
+	nc, err := nats.Connect(myself.mqbrokerUrl)
 	if err != nil {
 		return err
 	}
@@ -113,9 +118,9 @@ func (this *baseFuture) sentAndReply(subject string, content []byte, timeout tim
 	resMsg.Unmarshal(msg.Data)
 
 	// --- create response mapping ------
-	resultItems := this.doReply(resMsg)
+	resultItems := myself.doReply(resMsg)
 	// --- convert result result  ---
-	this.resultMap = this.convertResultMap(resultItems)
+	myself.resultMap = myself.convertResultMap(resultItems)
 
 	if err := nc.LastError(); err != nil {
 		log.Fatal(err)
@@ -126,7 +131,7 @@ func (this *baseFuture) sentAndReply(subject string, content []byte, timeout tim
 	return nil
 }
 
-func (this *baseFuture) convertResultMap(resultItems []*schema.ResultItem) map[string]*models.BaseResult {
+func (myself *baseFuture) convertResultMap(resultItems []*schema.ResultItem) map[string]*models.BaseResult {
 
 	baseResults := make(map[string]*models.BaseResult, 0)
 	for _, item := range resultItems {
@@ -150,8 +155,8 @@ func (this *baseFuture) convertResultMap(resultItems []*schema.ResultItem) map[s
 	return baseResults
 }
 
-func (this *baseFuture) send(subject string, content []byte) error {
-	nc, err := nats.Connect(this.mqbrokerUrl)
+func (myself *baseFuture) send(subject string, content []byte) error {
+	nc, err := nats.Connect(myself.mqbrokerUrl)
 	if err != nil {
 		return err
 	}
@@ -177,29 +182,29 @@ func (this *baseFuture) send(subject string, content []byte) error {
 /**
  * receive message from response
  */
-func (this *baseFuture) doReply(resMsg *schema.ResMsg) []*schema.ResultItem {
+func (myself *baseFuture) doReply(resMsg *schema.ResMsg) []*schema.ResultItem {
 
 	return resMsg.Response
 
 }
 
-func (this *baseFuture) prepareRequest(subjectChann string, reqmsg *models.RequestMsg, timeout time.Duration) {
-	this.reqMsg = reqmsg
-	this.timeout = timeout
-	this.subjectChann = subjectChann
+func (myself *baseFuture) prepareRequest(subjectChann string, reqmsg *models.RequestMsg, timeout time.Duration) {
+	myself.reqMsg = reqmsg
+	myself.timeout = timeout
+	myself.subjectChann = subjectChann
 }
 
 /**
  * call and public request
  */
-func (this *baseFuture) publishRequest(subjectChann string, reqmsg *models.RequestMsg) error {
-	this.reqMsg = reqmsg
-	this.subjectChann = subjectChann
+func (myself *baseFuture) publishRequest(subjectChann string, reqmsg *models.RequestMsg) error {
+	myself.reqMsg = reqmsg
+	myself.subjectChann = subjectChann
 
 	reqMsg := new(schema.ReqMsg)
-	reqMsg.Id = this.reqMsg.Id
+	reqMsg.Id = myself.reqMsg.Id
 
-	paramByteData, err := msgpack.Marshal(this.reqMsg.Params)
+	paramByteData, err := msgpack.Marshal(myself.reqMsg.Params)
 	reqMsg.Params = paramByteData
 	if err != nil {
 		return err
@@ -208,7 +213,7 @@ func (this *baseFuture) publishRequest(subjectChann string, reqmsg *models.Reque
 	// --- contruct request message ---
 	byteData, err := reqMsg.Marshal(nil)
 
-	this.send(this.subjectChann, byteData)
+	myself.send(myself.subjectChann, byteData)
 
 	return nil
 }
@@ -216,7 +221,7 @@ func (this *baseFuture) publishRequest(subjectChann string, reqmsg *models.Reque
 /**
  * receive response message
  */
-func (this *baseFuture) newFutureReturnResult(resmap map[string]*models.BaseResult) *baseFutureReturnResult {
+func (myself *baseFuture) newFutureReturnResult(resmap map[string]*models.BaseResult) *baseFutureReturnResult {
 
 	baseFutureRetRes := new(baseFutureReturnResult)
 

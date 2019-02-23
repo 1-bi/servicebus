@@ -42,18 +42,33 @@ func FunctypeInObject(object interface{}) string {
 	return function
 }
 
-// Config set the runtime config for servcie bus
-type Config struct {
+// AgentConfig  set the agent config for service bus client
+type AgentConfig struct {
 
 	// define message conder
 	encoder MessageEncoder
 }
 
-func (myself *Config) SetEncoder(encoder MessageEncoder) {
+func (myself *AgentConfig) SetEncoder(encoder MessageEncoder) {
 	myself.encoder = encoder
 }
 
-func (myself *Config) GetEncoder() MessageEncoder {
+func (myself *AgentConfig) GetEncoder() MessageEncoder {
+	return myself.encoder
+}
+
+// ServerConfig set the runtime config for servcie bus
+type ServerConfig struct {
+
+	// define message conder
+	encoder MessageEncoder
+}
+
+func (myself *ServerConfig) SetEncoder(encoder MessageEncoder) {
+	myself.encoder = encoder
+}
+
+func (myself *ServerConfig) GetEncoder() MessageEncoder {
 	return myself.encoder
 }
 
