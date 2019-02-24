@@ -4,6 +4,7 @@ import "github.com/1-bi/servicebus/schema"
 
 // define encode and decode interface
 type MessageEncoder interface {
+	GetType() byte
 
 	// --- encode object to byte ----
 	Encode(reqMsg *schema.ReqMsg) ([]byte, error)

@@ -110,9 +110,6 @@ func (myself *baseServiceAgent) Fire(serviceId string, runtimeArgs interface{}, 
  */
 func (myself *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs interface{}, timeout time.Duration, fn func(servicebus.FutureReturnResult, uerrors.CodeError)) {
 
-	// --- check the message encoder ---
-	msgConder := myself.runtimeConf.GetEncoder()
-
 	// --- check object ---
 
 	// ---- create request msg ----
@@ -122,6 +119,7 @@ func (myself *baseServiceAgent) FireSyncService(serviceId string, runtimeArgs in
 
 	// ---- create current event ---
 	f := createBaseFuture(myself.natsUrl)
+	f.SetEncoder(myself.runtimeConf.GetEncoder())
 
 	// ---- define timeout ----
 	f.prepareRequest(myself.name, reqmsg, timeout)

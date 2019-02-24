@@ -53,6 +53,17 @@ func (myself *baseFuture) GetStatus() int8 {
 	return 0
 }
 
+func (myself *baseFuture) contructMsgByte(body []byte) []byte {
+
+	header := make([]byte, 8)
+
+	// encoder type ---
+	header[0] = 1
+
+	return nil
+
+}
+
 /**
  * sent the message to mq in this function
  */
@@ -71,13 +82,13 @@ func (myself *baseFuture) Await() (coreErr uerrors.CodeError) {
 		// --- create new error
 		coreErr = uerrors.NewCodeError("E0000015", err.Error())
 		log.Fatalf("Error in Request: %v\n", err)
-	} else {
+		return coreErr
+	}
 
-		// ---- run sent request ---
-		err := myself.sentAndReply(myself.subjectChann, byteData, myself.timeout)
-		if err != nil {
-			coreErr = uerrors.NewCodeErrorWithPrefix("servbus", "errInSentAndReply", err.Error())
-		}
+	// ---- sent object ---
+	err = myself.sentAndReply(myself.subjectChann, byteData, myself.timeout)
+	if err != nil {
+		coreErr = uerrors.NewCodeErrorWithPrefix("servbus", "errInSentAndReply", err.Error())
 	}
 
 	return coreErr

@@ -6,6 +6,10 @@ import "github.com/1-bi/servicebus/schema"
 type GencodeEncoder struct {
 }
 
+func (myself *GencodeEncoder) GetType() byte {
+	return 0
+}
+
 func (myself *GencodeEncoder) Encode(reqMsg *schema.ReqMsg) ([]byte, error) {
 	return nil, nil
 }
