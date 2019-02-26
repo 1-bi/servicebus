@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"bytes"
 	"github.com/1-bi/servicebus"
 	"github.com/1-bi/servicebus/models"
 	"github.com/1-bi/servicebus/schema"
@@ -58,9 +59,21 @@ func (myself *baseFuture) contructMsgByte(body []byte) []byte {
 	header := make([]byte, 8)
 
 	// encoder type ---
-	header[0] = 1
+	header[0] = myself.encoder.GetType()
 
-	return nil
+	// --- is empty ---
+	header[1] = 0
+	header[2] = 0
+	header[3] = 0
+	header[4] = 0
+	header[5] = 0
+	header[6] = 0
+	header[7] = 0
+
+	msgBytes := [][]byte{header, body}
+	msgContentBytes := bytes.Join(msgBytes, []byte{})
+
+	return msgContentBytes
 
 }
 
@@ -85,6 +98,8 @@ func (myself *baseFuture) Await() (coreErr uerrors.CodeError) {
 		return coreErr
 	}
 
+	// --- contruct message content ---
+	byteData = myself.contructMsgByte(byteData)
 	// ---- sent object ---
 	err = myself.sentAndReply(myself.subjectChann, byteData, myself.timeout)
 	if err != nil {

@@ -157,16 +157,18 @@ func (myself *baseServiceManager) ListenServices() error {
 
 	nc.Subscribe(subj, func(msg *nats.Msg) {
 
+		maxLength := len(msg.Data)
+		// --- check the conder and encoder --
+		headerBytes := msg.Data[:8]
+		bodyBytes := msg.Data[8 : maxLength-1]
+
+		fmt.Println(headerBytes)
+		fmt.Println(bodyBytes)
+
 		// --- get the header flag ---
-		size := len(msg.Data)
-
-		fmt.Println(" content header ")
-		fmt.Println(size)
-
 		// ---- convert to req message ---
 		reqMsg := new(schema.ReqMsg)
-
-		reqMsg.Unmarshal(msg.Data)
+		reqMsg.Unmarshal(bodyBytes)
 
 		// --- get service process by service id ----
 		resmap := myself.doRequest(reqMsg)
