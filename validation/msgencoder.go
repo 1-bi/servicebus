@@ -5,7 +5,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-func ValidateMsgEncoderType(fl validator.FieldLevel) bool {
+func ValidateMsgEncoderMatch(fl validator.FieldLevel) bool {
 
 	fmt.Println("sdmoo")
 

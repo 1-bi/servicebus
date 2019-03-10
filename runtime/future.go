@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/1-bi/servicebus"
 	"github.com/1-bi/servicebus/models"
 	"github.com/1-bi/servicebus/schema"
@@ -100,6 +101,11 @@ func (myself *baseFuture) Await() (coreErr uerrors.CodeError) {
 
 	// --- contruct message content ---
 	byteData = myself.contructMsgByte(byteData)
+
+	sendSize := len(byteData)
+	fmt.Println("send size : ")
+	fmt.Println(sendSize)
+
 	// ---- sent object ---
 	err = myself.sentAndReply(myself.subjectChann, byteData, myself.timeout)
 	if err != nil {

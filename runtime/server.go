@@ -66,7 +66,7 @@ func (myself *baseServiceManager) validateMessageEncoder(encoder servicebus.Mess
 	}
 
 	met := MessageEncodertype{}
-	myself.validate.RegisterValidation("validate-msgencoder", validation.ValidateMsgEncoderType)
+	myself.validate.RegisterValidation("validate-msgencoder", validation.ValidateMsgEncoderMatch)
 
 	err := myself.validate.Struct(met)
 	if err != nil {
@@ -140,6 +140,13 @@ func (myself *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs 
 
 }
 
+func (myself *baseServiceManager) initValidation() error {
+
+	myself.validate.RegisterValidation("check-encoder-match", validation.ValidateMsgEncoderMatch)
+
+	return nil
+}
+
 /**
  * start up boot and listen service
  * Listen service use default request / rply mode
@@ -151,16 +158,28 @@ func (myself *baseServiceManager) ListenServices() error {
 		log.Fatalf("Can't connect: %v\n", err)
 	}
 
+	err = myself.initValidation()
+	if err != nil {
+		return err
+	}
+
 	//queue := "default"
 
 	subj := myself.name
 
-	nc.Subscribe(subj, func(msg *nats.Msg) {
+	_, suberr := nc.Subscribe(subj, func(msg *nats.Msg) {
 
 		maxLength := len(msg.Data)
 		// --- check the conder and encoder --
 		headerBytes := msg.Data[:8]
 		bodyBytes := msg.Data[8 : maxLength-1]
+
+		// --- check and validate data ---
+		msgVal := new(validation.MsgCandidateVali)
+		msgVal.Header = headerBytes
+
+		fmt.Println("recieve size  ")
+		fmt.Println(maxLength)
 
 		fmt.Println(headerBytes)
 		fmt.Println(bodyBytes)
@@ -187,6 +206,10 @@ func (myself *baseServiceManager) ListenServices() error {
 
 	})
 	nc.Flush()
+
+	if suberr != nil {
+
+	}
 
 	if err := nc.LastError(); err != nil {
 		log.Fatal(err)
