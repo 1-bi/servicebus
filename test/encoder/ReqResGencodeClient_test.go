@@ -38,6 +38,7 @@ func Test_ReqResGencode_Case1(t *testing.T) {
 
 		if codeErr != nil {
 			log.Panic(codeErr)
+			return
 		}
 
 		var resstr string

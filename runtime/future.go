@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/1-bi/servicebus"
 	"github.com/1-bi/servicebus/models"
@@ -145,9 +146,23 @@ func (myself *baseFuture) sentAndReply(subject string, content []byte, timeout t
 		}
 		return err
 	}
+
+	// --- unwrapper message ---
+	maxLength := len(msg.Data)
+	// --- check the conder and encoder --
+	headerBytes := msg.Data[:8]
+	bodyBytes := msg.Data[8 : maxLength-1]
+
+	if headerBytes[0] == byte(1) {
+		// parse ---
+
+		errorMsg := string(bodyBytes)
+		return errors.New(errorMsg)
+	}
+
 	// --- convert to replied object ---
 	resMsg := new(schema.ResMsg)
-	resMsg.Unmarshal(msg.Data)
+	resMsg.Unmarshal(bodyBytes)
 
 	// --- create response mapping ------
 	resultItems := myself.doReply(resMsg)

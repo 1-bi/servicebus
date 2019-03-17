@@ -5,9 +5,24 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-func ValidateMsgEncoderMatch(fl validator.FieldLevel) bool {
+var CurrentMsgEncoderType = byte(0)
 
-	fmt.Println("sdmoo")
+// CheckMsgEncoderMatch check the bean validator
+func CheckMsgEncoderMatch(fl validator.FieldLevel) bool {
 
-	return fl.Field().String() == "awesome"
+	fmt.Println("content type ")
+	fmt.Println(CurrentMsgEncoderType)
+
+	var msgEncoderType byte
+	msgEncoderType = CurrentMsgEncoderType
+
+	var headerBytes []byte
+	headerBytes = fl.Field().Interface().([]byte)
+
+	if msgEncoderType == headerBytes[0] {
+		return true
+	} else {
+		return false
+	}
+
 }

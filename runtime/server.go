@@ -1,6 +1,8 @@
 package runtime
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"github.com/1-bi/servicebus"
 	"github.com/1-bi/servicebus/models"
@@ -48,33 +50,11 @@ func NewServiceManager(natsUrl string) (servicebus.ServiceManager, error) {
 // SetConfig init the servicebus instance
 func (myself *baseServiceManager) SetConfig(conf *servicebus.ServerConfig) error {
 
-	// --- check the config envirment ----
-
-	err := myself.validateMessageEncoder(conf.GetEncoder())
-	if err != nil {
-		return err
-	}
 	myself.msgEncoder = conf.GetEncoder()
 
-	return nil
-}
-
-func (myself *baseServiceManager) validateMessageEncoder(encoder servicebus.MessageEncoder) error {
-
-	type MessageEncodertype struct {
-		encoderInst interface{} `validate:"validate-msgencoder"`
-	}
-
-	met := MessageEncodertype{}
-	myself.validate.RegisterValidation("validate-msgencoder", validation.ValidateMsgEncoderMatch)
-
-	err := myself.validate.Struct(met)
-	if err != nil {
-		fmt.Printf("Err(s):\n%+v\n", err)
-	}
+	//validation.CurrentMsgEncoderType = myself.msgEncoder.GetType()
 
 	return nil
-
 }
 
 /**
@@ -142,7 +122,7 @@ func (myself *baseServiceManager) FireWithNoReply(serviceId string, runtimeArgs 
 
 func (myself *baseServiceManager) initValidation() error {
 
-	myself.validate.RegisterValidation("check-encoder-match", validation.ValidateMsgEncoderMatch)
+	myself.validate.RegisterValidation("check-encoder-match", validation.CheckMsgEncoderMatch)
 
 	return nil
 }
@@ -174,15 +154,29 @@ func (myself *baseServiceManager) ListenServices() error {
 		headerBytes := msg.Data[:8]
 		bodyBytes := msg.Data[8 : maxLength-1]
 
-		// --- check and validate data ---
+		// --- check and validate data from query  ---
 		msgVal := new(validation.MsgCandidateVali)
 		msgVal.Header = headerBytes
 
-		fmt.Println("recieve size  ")
-		fmt.Println(maxLength)
+		var valiErrs []string
+		valiErrs = make([]string, 0)
 
-		fmt.Println(headerBytes)
-		fmt.Println(bodyBytes)
+		err = myself.validate.Struct(msgVal)
+		if err != nil {
+			errs := err.(validator.ValidationErrors)
+
+			// contruct new error message
+
+			for _, e := range errs {
+				// can translate each error one at a time.
+				if e.Tag() == "check-encoder-match" {
+					valiErrs = append(valiErrs, "Decoreder handle type is not suitable to content. ")
+				}
+			}
+
+			log.Println(errors.New(strings.Join(valiErrs, "\n")))
+
+		}
 
 		// --- get the header flag ---
 		// ---- convert to req message ---
@@ -195,14 +189,26 @@ func (myself *baseServiceManager) ListenServices() error {
 		// --- result map ---
 		resMsg := myself.doResponse(reqMsg.Id, resmap)
 
-		byteContent, err := resMsg.Marshal(nil)
+		repsBodyContent, err := resMsg.Marshal(nil)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		// --- construct response byte ---
+		respHeaderBytes := make([]byte, 8)
+
+		if len(valiErrs) > 0 {
+			// --- set the header byte content --
+			respHeaderBytes[0] = 1 // error = 1 , no error = 0
+		}
+
+		// --- define message
+		msgBytes := [][]byte{respHeaderBytes, repsBodyContent}
+		msgContentBytes := bytes.Join(msgBytes, []byte{})
+
 		// ---- reply message
-		nc.Publish(msg.Reply, byteContent)
+		nc.Publish(msg.Reply, msgContentBytes)
 
 	})
 	nc.Flush()
