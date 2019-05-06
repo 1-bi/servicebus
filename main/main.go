@@ -3,17 +3,32 @@ package main
 import (
 	"fmt"
 	"github.com/1-bi/cron"
-	dis "github.com/1-bi/servicebus"
+	"github.com/1-bi/servicebus"
 	"log"
 	"time"
 )
 
 func main() {
 
-	serviceName := "s-test"
-	serviceInfo := dis.ServiceInfo{IP: "vicenteyou"}
+	var conf = servicebus.NewConfig()
 
-	s, err := dis.NewService(serviceName, serviceInfo, []string{
+	//
+	var agent = servicebus.NewAgent(conf)
+
+	agent.Start()
+
+	defer agent.Stop()
+
+	// connect api --
+
+}
+
+func regServer() {
+
+	serviceName := "s-test"
+	serviceInfo := servicebus.ServiceInfo{IP: "vicenteyou"}
+
+	s, err := servicebus.NewService(serviceName, serviceInfo, []string{
 		"http://localhost:2379",
 	})
 

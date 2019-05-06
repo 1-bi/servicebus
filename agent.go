@@ -4,6 +4,14 @@ package servicebus
 type Agent struct {
 }
 
+func (myself *Agent) Start() {
+
+}
+
+func (myself *Agent) Stop() {
+
+}
+
 func (myself *Agent) startRegisterServer() {
 
 }
@@ -20,13 +28,16 @@ func (myself *Agent) getNodeAgentList() {
 
 }
 
-// StartAgent check agent
-func StartAgent() {
+// NewAgent check agent
+func NewAgent(conf *Config) *Agent {
+
+	var agent = new(Agent)
 
 	//  start scheduler
 
 	// check health
 
 	// start describe queue to nats
+	return agent
 
 }
