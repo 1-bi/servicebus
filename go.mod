@@ -1,6 +1,7 @@
 module github.com/1-bi/servicebus
 
 require (
+	github.com/1-bi/log-zap v0.0.1 // indirect
 	github.com/1-bi/uerrors v0.0.0-20181130092621-750e9e1e6077
 	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/nats-io/gnatsd v1.3.0 // indirect
