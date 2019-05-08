@@ -16,6 +16,9 @@ func (myself *Agent) Start() {
 	// --- open thread
 	go myself.startRegisterServer()
 
+	// --- start watch server
+	go myself.startWatchServer()
+
 }
 
 func (myself *Agent) Stop() {

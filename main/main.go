@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/1-bi/cron"
 	"github.com/1-bi/log-api"
 	"github.com/1-bi/log-zap"
@@ -76,26 +75,27 @@ func prepareLogSetting() {
 }
 
 func regServer() {
+	/*
+		serviceName := "s-test"
+		serviceInfo := servicebus.AgentInfo{IP: "vicenteyou"}
 
-	serviceName := "s-test"
-	serviceInfo := servicebus.AgentInfo{IP: "vicenteyou"}
+		s, err := servicebus.NewAgentRegisterService(serviceName, serviceInfo, []string{
+			"http://localhost:2379",
+		})
 
-	s, err := servicebus.NewAgentRegisterService(serviceName, serviceInfo, []string{
-		"http://localhost:2379",
-	})
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	if err != nil {
-		log.Fatal(err)
-	}
+		fmt.Printf("name:%s, ip:%s\n", s.nodeId, s.Info.IP)
 
-	fmt.Printf("name:%s, ip:%s\n", s.nodeId, s.Info.IP)
+		go func() {
+			time.Sleep(time.Second * 20)
+			s.Stop()
+		}()
 
-	go func() {
-		time.Sleep(time.Second * 20)
-		s.Stop()
-	}()
-
-	s.Start()
+		s.Start()
+	*/
 }
 
 func myFunc() {

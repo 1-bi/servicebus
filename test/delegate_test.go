@@ -55,3 +55,11 @@ func Test_Delegate_Case2(t *testing.T) {
 	agent.FireService("event.req.test1", "hello world , one request ")
 
 }
+
+func Test_time(t *testing.T) {
+
+	var tim = time.Now()
+
+	fmt.Println(tim.UnixNano())
+
+}
