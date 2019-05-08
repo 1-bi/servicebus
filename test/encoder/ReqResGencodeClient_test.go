@@ -124,7 +124,7 @@ func Test_Req_Res_Case4(t *testing.T) {
 	timeout = 3 * time.Second
 
 	mockObj1 := new(MockObj1)
-	mockObj1.Name = "Hello, good boy."
+	mockObj1.nodeId = "Hello, good boy."
 	mockObj1.Age = 20
 
 	resultRec := func(result servicebus.FutureReturnResult, codeErr uerrors.CodeError) {

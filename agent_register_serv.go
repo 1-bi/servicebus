@@ -6,42 +6,44 @@ import (
 	"errors"
 	"github.com/coreos/etcd/clientv3"
 	"log"
-	"time"
 )
 
 //the detail of service
-type ServiceInfo struct {
-	IP string
+type AgentInfo struct {
+	LastUpdatedTime int64
 }
 
-type Service struct {
-	Name    string
-	Info    ServiceInfo
+func (myself *AgentInfo) SetLastUpdatedTime(t int64) {
+	myself.LastUpdatedTime = t
+}
+
+func NewAgentInfo() *AgentInfo {
+	var agentInfo = new(AgentInfo)
+
+	return agentInfo
+}
+
+type AgentServiceRegService struct {
+	nodeId  string
+	Info    AgentInfo
 	stop    chan error
 	leaseid clientv3.LeaseID
 	client  *clientv3.Client
+	_prefix string
 }
 
-func NewService(name string, info ServiceInfo, endpoints []string) (*Service, error) {
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   endpoints,
-		DialTimeout: 2 * time.Second,
-	})
+func NewAgentRegisterService(nodeId string, cli *clientv3.Client) *AgentServiceRegService {
 
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
+	// --- create  AgentService ---
+	var agentRegServ = new(AgentServiceRegService)
+	agentRegServ.client = cli
+	agentRegServ.nodeId = nodeId
+	agentRegServ.stop = make(chan error)
 
-	return &Service{
-		Name:   name,
-		Info:   info,
-		stop:   make(chan error),
-		client: cli,
-	}, err
+	return agentRegServ
 }
 
-func (s *Service) Start() error {
+func (s *AgentServiceRegService) Start() error {
 
 	ch, err := s.keepAlive()
 	if err != nil {
@@ -62,21 +64,21 @@ func (s *Service) Start() error {
 				s.revoke()
 				return nil
 			} else {
-				log.Printf("Recv reply from service: %s, ttl:%d", s.Name, ka.TTL)
+				log.Printf("Recv reply from service: %s, ttl:%d", s.nodeId, ka.TTL)
 			}
 		}
 	}
 }
 
-func (s *Service) Stop() {
+func (s *AgentServiceRegService) Stop() {
 	s.stop <- nil
 }
 
-func (s *Service) keepAlive() (<-chan *clientv3.LeaseKeepAliveResponse, error) {
+func (s *AgentServiceRegService) keepAlive() (<-chan *clientv3.LeaseKeepAliveResponse, error) {
 
 	info := &s.Info
 
-	key := "services/" + s.Name
+	key := "/agent/nodes/" + s.nodeId
 	value, _ := json.Marshal(info)
 
 	// minimum lease TTL is 5-second
@@ -96,12 +98,12 @@ func (s *Service) keepAlive() (<-chan *clientv3.LeaseKeepAliveResponse, error) {
 	return s.client.KeepAlive(context.TODO(), resp.ID)
 }
 
-func (s *Service) revoke() error {
+func (s *AgentServiceRegService) revoke() error {
 
 	_, err := s.client.Revoke(context.TODO(), s.leaseid)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("servide:%s stop\n", s.Name)
+	log.Printf("servide:%s stop\n", s.nodeId)
 	return err
 }

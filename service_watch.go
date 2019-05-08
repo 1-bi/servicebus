@@ -19,7 +19,7 @@ type Master struct {
 type Node struct {
 	State bool
 	Key   string
-	Info  ServiceInfo
+	Info  AgentInfo
 }
 
 func NewMaster(endpoints []string, watchPath string) (*Master, error) {
@@ -43,7 +43,7 @@ func NewMaster(endpoints []string, watchPath string) (*Master, error) {
 	return master, err
 }
 
-func (m *Master) AddNode(key string, info *ServiceInfo) {
+func (m *Master) AddNode(key string, info *AgentInfo) {
 	node := &Node{
 		State: true,
 		Key:   key,
@@ -53,8 +53,8 @@ func (m *Master) AddNode(key string, info *ServiceInfo) {
 	m.Nodes[node.Key] = node
 }
 
-func GetServiceInfo(ev *clientv3.Event) *ServiceInfo {
-	info := &ServiceInfo{}
+func GetServiceInfo(ev *clientv3.Event) *AgentInfo {
+	info := &AgentInfo{}
 	err := json.Unmarshal([]byte(ev.Kv.Value), info)
 	if err != nil {
 		log.Println(err)
