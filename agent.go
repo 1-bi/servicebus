@@ -36,17 +36,7 @@ func (myself *Agent) startRegisterServer() {
 		return
 	}
 
-	//serviceInfo := AgentInfo{LastUpdatedTime: 125456}
-
 	var serv = NewAgentRegisterService(myself.conf._agentNodeId, cli)
-
-	/*
-		var serv = &AgentServiceRegService{		nodeId: "agent-name",
-			Info:   serviceInfo,
-			stop:   make(chan error),
-			client: cli,
-		}
-	*/
 
 	err = serv.Start()
 	if err != nil {
@@ -56,6 +46,22 @@ func (myself *Agent) startRegisterServer() {
 }
 
 func (myself *Agent) startWatchServer() {
+
+	cli, err := clientv3.New(myself.conf._etcdConfig)
+
+	if err != nil {
+		structBean := logapi.NewStructBean()
+		structBean.LogStringArray("etcd.server", myself.conf._etcdConfig.Endpoints)
+		logapi.GetLogger("serviebus.agent").Fatal("Connect etcd server fail.", structBean)
+		return
+	}
+
+	var serv = NewAgentWatchService(myself.conf._agentNodeId, cli)
+
+	err = serv.Start()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 }
 
