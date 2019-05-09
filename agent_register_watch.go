@@ -38,7 +38,6 @@ func (myself *AgentServiceWatchService) Start() error {
 			case clientv3.EventTypeDelete:
 				fmt.Printf("[%s] %q : %q\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
 				fmt.Println(string(ev.Kv.Key))
-
 			}
 		}
 	}
