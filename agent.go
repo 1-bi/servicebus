@@ -3,6 +3,7 @@ package servicebus
 import (
 	"fmt"
 	"github.com/1-bi/log-api"
+	"github.com/1-bi/servicebus/schema"
 	"github.com/coreos/etcd/clientv3"
 )
 
@@ -25,6 +26,26 @@ func (myself *Agent) Stop() {
 
 }
 
+// On implement event name
+func (myself *Agent) On(eventName string, fn func(ServiceEventHandler)) error {
+
+	return nil
+}
+
+// Fire call by event name and define callback
+func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback) error {
+
+	// serialization runtimeArgs
+	reqEvent := new(schema.ReqEvent)
+	reqEvent.Name = eventName
+	reqEvent.ParamsBody = msgBody
+
+	// --- sent msg body ---
+
+	return nil
+}
+
+// ---------------------  private method ---
 func (myself *Agent) startRegisterServer() {
 
 	cli, err := clientv3.New(myself.conf._etcdConfig)

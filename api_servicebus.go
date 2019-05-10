@@ -10,16 +10,13 @@ import (
 	"time"
 )
 
-/**
- * create all interface context
- */
-
+// ServiceEvent ServiceEvent is define full message
 type ServiceEvent interface {
 
 	/**
 	 * call one service handle
 	 */
-	On(serviceId string, fn func(ServiceEventHandler)) error
+	On(eventName string, fn func(ServiceEventHandler)) error
 
 	/**
 	 * fire service in synchronous mode
