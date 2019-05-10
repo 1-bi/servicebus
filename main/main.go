@@ -24,6 +24,10 @@ func main() {
 		DialTimeout: 2 * time.Second,
 	})
 
+	conf.SetNodeRoles([]string{
+		"master", "minion",
+	})
+
 	var configErr = conf.CheckBeforeStart()
 
 	if configErr != nil {

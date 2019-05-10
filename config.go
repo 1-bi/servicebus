@@ -14,6 +14,8 @@ type Config struct {
 	// --- define default value --
 	nodeIdPath string
 
+	nodeRoles []string
+
 	nodeNum int64
 
 	_agentNodeId string
@@ -26,6 +28,10 @@ func NewConfig() *Config {
 	conf.nodeIdPath = "/etc/servicebus/agent/node_id"
 	conf.nodeNum = 1
 	return conf
+}
+
+func (myself *Config) SetNodeRoles(newRoles []string) {
+	myself.nodeRoles = newRoles
 }
 
 func (myself *Config) CheckBeforeStart() error {

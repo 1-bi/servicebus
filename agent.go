@@ -36,7 +36,12 @@ func (myself *Agent) startRegisterServer() {
 		return
 	}
 
-	var serv = NewAgentRegisterService(myself.conf._agentNodeId, cli)
+	var nodeRoles = []string{"master", "minion"}
+	if len(myself.conf.nodeRoles) == 0 {
+		nodeRoles = myself.conf.nodeRoles
+	}
+
+	var serv = NewAgentRegisterService(myself.conf._agentNodeId, cli, nodeRoles)
 
 	err = serv.Start()
 	if err != nil {

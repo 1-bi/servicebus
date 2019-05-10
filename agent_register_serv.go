@@ -7,6 +7,7 @@ import (
 	"github.com/1-bi/log-api"
 	"github.com/coreos/etcd/clientv3"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -31,9 +32,11 @@ type AgentServiceRegService struct {
 	leaseid clientv3.LeaseID
 	client  *clientv3.Client
 	_prefix string
+
+	roles []string
 }
 
-func NewAgentRegisterService(nodeId string, cli *clientv3.Client) *AgentServiceRegService {
+func NewAgentRegisterService(nodeId string, cli *clientv3.Client, roles []string) *AgentServiceRegService {
 
 	// --- create  AgentService ---
 	var agentRegServ = new(AgentServiceRegService)
@@ -41,9 +44,11 @@ func NewAgentRegisterService(nodeId string, cli *clientv3.Client) *AgentServiceR
 	agentRegServ.nodeId = nodeId
 	agentRegServ.stop = make(chan error)
 
-	agentRegServ._prefix = "/agent/nodes/"
+	agentRegServ._prefix = "nodes"
+	agentRegServ.roles = roles
 
 	return agentRegServ
+
 }
 
 func (s *AgentServiceRegService) Start() error {
@@ -105,9 +110,6 @@ func (myself *AgentServiceRegService) leaseGrant() (*clientv3.LeaseGrantResponse
 
 func (myself *AgentServiceRegService) keepAliveFirst(resp *clientv3.LeaseGrantResponse) (<-chan *clientv3.LeaseKeepAliveResponse, error) {
 
-	// --- get properties key --
-	key := myself._prefix + myself.nodeId
-
 	var err error
 	var value []byte
 	value, err = myself.getLastUpdatedAgentInfo()
@@ -115,11 +117,16 @@ func (myself *AgentServiceRegService) keepAliveFirst(resp *clientv3.LeaseGrantRe
 		return nil, err
 	}
 
-	_, err = myself.client.Put(context.TODO(), key, string(value), clientv3.WithLease(resp.ID))
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
+	var key string
+	for _, noderole := range myself.roles {
+		key = strings.Join([]string{myself._prefix, noderole + "=" + myself.nodeId}, "/")
+		_, err = myself.client.Put(context.TODO(), key, string(value), clientv3.WithLease(resp.ID))
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
+		}
 	}
+
 	myself.leaseid = resp.ID
 
 	return myself.client.KeepAlive(context.TODO(), resp.ID)

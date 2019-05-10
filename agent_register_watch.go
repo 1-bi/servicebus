@@ -19,12 +19,23 @@ func NewAgentWatchService(nodeId string, cli *clientv3.Client) *AgentServiceWatc
 	agentWatchServ.client = cli
 	agentWatchServ.nodeId = nodeId
 
-	agentWatchServ._prefix = "/agent/nodes/"
+	agentWatchServ._prefix = "nodes/"
 	return agentWatchServ
 }
 
 func (myself *AgentServiceWatchService) Start() error {
 
+	// go and define object
+
+	return nil
+}
+
+func (myself *AgentServiceWatchService) Stop() error {
+	return nil
+}
+
+func (myself *AgentServiceWatchService) watchNodeChange() {
+	// --- watch message of node changed
 	rch := myself.client.Watch(context.Background(), myself._prefix, clientv3.WithPrefix())
 	for wresp := range rch {
 		for _, ev := range wresp.Events {
@@ -42,11 +53,4 @@ func (myself *AgentServiceWatchService) Start() error {
 		}
 	}
 
-	// go and define object
-
-	return nil
-}
-
-func (myself *AgentServiceWatchService) Stop() error {
-	return nil
 }
