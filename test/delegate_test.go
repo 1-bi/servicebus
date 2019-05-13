@@ -32,6 +32,8 @@ func Test_Agent_BaseCase1(t *testing.T) {
 
 	// --- check
 
+	time.Sleep(1 * time.Second)
+
 	agent.Fire("agent.test.case", []byte("hello test"))
 
 	//	runtime.Goexit()

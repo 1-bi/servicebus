@@ -2,8 +2,8 @@ package etcd
 
 import (
 	"context"
-	"fmt"
 	"github.com/coreos/etcd/clientv3"
+	"strings"
 )
 
 type EtcdServiceOperations struct {
@@ -32,24 +32,22 @@ func (myself EtcdServiceOperations) GetAllNodeIds(role string) ([]string, error)
 
 	var prefix = myself._nodePrefix + role + "="
 
-	fmt.Println(prefix)
-
 	// --- watch message of node changed
-	resp, err := myself.client.Get(context.Background(), prefix, clientv3.WithPrevKV())
+
+	resp, err := myself.client.Get(context.Background(), prefix, clientv3.WithPrefix())
 
 	if err != nil {
 		return nil, err
 	}
 
 	nodeIds := make([]string, 0)
+	var nodeId string
 
-	fmt.Println(resp.Count)
+	for _, value := range resp.Kvs {
 
-	for key, value := range resp.Kvs {
+		nodeId = strings.Replace(string(value.Key), prefix, "", 0)
 
-		fmt.Println(key)
-
-		nodeIds = append(nodeIds, string(value.Key))
+		nodeIds = append(nodeIds, nodeId)
 	}
 
 	return nodeIds, nil

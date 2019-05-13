@@ -48,7 +48,7 @@ func (myself *Agent) Start() {
 	waitgroup.Add(2)
 	// --- open thread
 	go func() {
-		myself.startRegisterServer(cli)
+		go myself.startRegisterServer(cli)
 		waitgroup.Done()
 	}()
 
