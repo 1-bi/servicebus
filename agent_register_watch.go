@@ -35,6 +35,7 @@ func (myself *AgentServiceWatchService) Stop() error {
 }
 
 func (myself *AgentServiceWatchService) watchNodeChange() {
+
 	// --- watch message of node changed
 	rch := myself.client.Watch(context.Background(), myself._prefix, clientv3.WithPrefix())
 	for wresp := range rch {
@@ -53,4 +54,9 @@ func (myself *AgentServiceWatchService) watchNodeChange() {
 		}
 	}
 
+}
+
+// GetRuntimeNodeIds
+func (myself *AgentServiceWatchService) GetRuntimeNodeIds() []string {
+	return nil
 }

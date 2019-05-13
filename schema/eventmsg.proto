@@ -1,0 +1,14 @@
+syntax = "proto3";
+package schema;
+
+message ReqEvent {
+  int64 reqId = 1;
+  string name = 2;
+  bytes  msgBody = 3;
+}
+
+message ResEvent {
+  int64  reqId = 1;
+  string name = 2;
+  bytes resultBody = 3;
+}

@@ -3,23 +3,61 @@ package servicebus
 import (
 	"fmt"
 	"github.com/1-bi/log-api"
+	"github.com/1-bi/servicebus/etcd"
 	"github.com/1-bi/servicebus/schema"
+	"github.com/bwmarrin/snowflake"
 	"github.com/coreos/etcd/clientv3"
+	"sync"
 )
+
+var waitgroup sync.WaitGroup
 
 // Agent define service bus agent proxy
 type Agent struct {
 	conf *Config
+
+	nodeGenerater *snowflake.Node
+
+	etcdServOpt *etcd.EtcdServiceOperations
 }
 
 func (myself *Agent) Start() {
 
+	node, err := snowflake.NewNode(myself.conf.nodeNum)
+
+	if err != nil {
+		logapi.GetLogger("start").Fatal(err.Error(), nil)
+	} else {
+		myself.nodeGenerater = node
+	}
+
+	// --- connect client ---
+	var cli *clientv3.Client
+	cli, err = clientv3.New(myself.conf._etcdConfig)
+
+	if err != nil {
+		structBean := logapi.NewStructBean()
+		structBean.LogStringArray("etcd.server", myself.conf._etcdConfig.Endpoints)
+		logapi.GetLogger("serviebus.Start").Fatal("Connect etcd server fail.", structBean)
+		return
+	}
+
+	servOptsMap := make(map[string]string, 0)
+	myself.etcdServOpt = etcd.NewEtcdServiceOperations(cli, servOptsMap)
+
+	waitgroup.Add(2)
 	// --- open thread
-	go myself.startRegisterServer()
+	go func() {
+		myself.startRegisterServer(cli)
+		waitgroup.Done()
+	}()
 
+	go func() {
+		myself.startWatchServer(cli)
+		waitgroup.Done()
+	}()
 	// --- start watch server
-	go myself.startWatchServer()
-
+	waitgroup.Wait()
 }
 
 func (myself *Agent) Stop() {
@@ -37,25 +75,38 @@ func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback
 
 	// serialization runtimeArgs
 	reqEvent := new(schema.ReqEvent)
+
+	reqEvent.ReqId = myself.nodeGenerater.Generate().Int64()
 	reqEvent.Name = eventName
-	reqEvent.ParamsBody = msgBody
+	reqEvent.MsgBody = msgBody
 
 	// --- sent msg body ---
+	var reqMsg []byte
+
+	reqMsg, err := reqEvent.Marshal()
+
+	if err != nil {
+		return err
+	}
+
+	// get minion runinng node
+
+	fmt.Println(string(reqMsg))
+
+	nodes, err := myself.etcdServOpt.GetAllNodeIds("minion")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(nodes)
 
 	return nil
 }
 
 // ---------------------  private method ---
-func (myself *Agent) startRegisterServer() {
+func (myself *Agent) startRegisterServer(cli *clientv3.Client) {
 
-	cli, err := clientv3.New(myself.conf._etcdConfig)
-
-	if err != nil {
-		structBean := logapi.NewStructBean()
-		structBean.LogStringArray("etcd.server", myself.conf._etcdConfig.Endpoints)
-		logapi.GetLogger("serviebus.agent").Fatal("Connect etcd server fail.", structBean)
-		return
-	}
+	var err error
 
 	var nodeRoles = []string{"master", "minion"}
 	if len(myself.conf.nodeRoles) == 0 {
@@ -71,17 +122,9 @@ func (myself *Agent) startRegisterServer() {
 
 }
 
-func (myself *Agent) startWatchServer() {
+func (myself *Agent) startWatchServer(cli *clientv3.Client) {
 
-	cli, err := clientv3.New(myself.conf._etcdConfig)
-
-	if err != nil {
-		structBean := logapi.NewStructBean()
-		structBean.LogStringArray("etcd.server", myself.conf._etcdConfig.Endpoints)
-		logapi.GetLogger("serviebus.agent").Fatal("Connect etcd server fail.", structBean)
-		return
-	}
-
+	var err error
 	var serv = NewAgentWatchService(myself.conf._agentNodeId, cli)
 
 	err = serv.Start()
@@ -92,6 +135,11 @@ func (myself *Agent) startWatchServer() {
 }
 
 func (myself *Agent) checkRegCenterConnect() {
+
+}
+
+// getAllNodeIdsByRole define role string
+func (myself *Agent) getAllNodeIdsByRole(role string) {
 
 }
 

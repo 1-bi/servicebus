@@ -1,65 +1,89 @@
 package test
 
 import (
-	"fmt"
+	"github.com/1-bi/log-api"
+	"github.com/1-bi/log-zap"
+	"github.com/1-bi/log-zap/appender"
+	zaplayout "github.com/1-bi/log-zap/layout"
 	"github.com/1-bi/servicebus"
-	rt "github.com/1-bi/servicebus/runtime"
-	"github.com/1-bi/uerrors"
-	"github.com/nats-io/go-nats"
+	"github.com/coreos/etcd/clientv3"
 	"log"
 	"testing"
 	"time"
 )
 
-func Test_Delegate_Case1(t *testing.T) {
+func Test_Agent_BaseCase1(t *testing.T) {
 
-	// --- create delete object ---
+	// --- create agent ---
+	prepareLogSetting()
 
-	natsUrl := nats.DefaultURL
+	conf, err := prepareConfig()
 
-	agent := rt.NewServiceAgent(natsUrl)
-
-	var timeout time.Duration
-	timeout = 3 * time.Second
-
-	resultRec := func(result servicebus.FutureReturnResult, codeErr uerrors.CodeError) {
-
-		if codeErr != nil {
-			log.Panic(codeErr)
-		}
-
-		var resstr string
-
-		result.ReturnResult(&resstr)
-
-		fmt.Println(" response result ------------------ ")
-		fmt.Println(resstr)
-		fmt.Println(" response result ------------------ ")
+	if err != nil {
+		logapi.GetLogger("agent_basecase1").Fatal(err.Error(), nil)
 	}
 
-	agent.FireSyncService("event.req.test1", "hello world , one request ", timeout, resultRec)
+	// dstart agent to complent
+	var agent = servicebus.NewAgent(conf)
+
+	agent.Start()
+
+	defer agent.Stop()
+
+	// --- check
+
+	agent.Fire("agent.test.case", []byte("hello test"))
+
+	//	runtime.Goexit()
+	// stop main thread running
+	select {}
 
 }
 
-func Test_Delegate_Case2(t *testing.T) {
+func prepareConfig() (*servicebus.Config, error) {
 
-	// --- create delete object ---
+	var conf = servicebus.NewConfig()
 
-	natsUrl := nats.DefaultURL
+	conf.SetRegisterServer(clientv3.Config{
+		Endpoints:   []string{"http://localhost:2379"},
+		DialTimeout: 2 * time.Second,
+	})
 
-	agent := rt.NewServiceAgent(natsUrl)
+	conf.SetNodeRoles([]string{
+		"master", "minion",
+	})
 
-	//var timeout time.Duration
-	//timeout = 3 * time.Second
+	var configErr = conf.CheckBeforeStart()
 
-	agent.FireService("event.req.test1", "hello world , one request ")
+	return conf, configErr
 
 }
 
-func Test_time(t *testing.T) {
+func prepareLogSetting() {
 
-	var tim = time.Now()
+	// --- construct layout ---
+	var jsonLayout = zaplayout.NewJsonLayout()
+	//jsonLayout.SetTimeFormat("2006-01-02 15:04:05")
+	jsonLayout.SetTimeFormat("2006-01-02 15:04:05 +0800 CST")
+	//fmt.Println( time.Now().Location() )
 
-	fmt.Println(tim.UnixNano())
+	// --- set appender
+	var consoleAppender = appender.NewConsoleAppender(jsonLayout)
 
+	var mainOpt = logzap.NewLoggerOption()
+	mainOpt.SetLevel("debug")
+	mainOpt.AddAppender(consoleAppender)
+
+	var agentOpt = logzap.NewLoggerOption()
+	agentOpt.SetLoggerPattern("servicebus")
+	agentOpt.SetLevel("warn")
+	agentOpt.AddAppender(consoleAppender)
+
+	var implReg = new(logzap.ZapFactoryRegister)
+
+	_, err := logapi.RegisterLoggerFactory(implReg, mainOpt, agentOpt)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
