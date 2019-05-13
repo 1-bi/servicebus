@@ -7,6 +7,8 @@ import (
 	"github.com/1-bi/servicebus/schema"
 	"github.com/bwmarrin/snowflake"
 	"github.com/coreos/etcd/clientv3"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -91,12 +93,28 @@ func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback
 
 	// get minion runinng node
 
-	fmt.Println(string(reqMsg))
-
 	nodes, err := myself.etcdServOpt.GetAllNodeIds("minion")
 	if err != nil {
 		return err
 	}
+
+	// pub the message to content
+	for _, node := range nodes {
+
+		// --- key ---
+		var key = strings.Join([]string{"reqm", strconv.FormatInt(reqEvent.ReqId, 10), "mi=" + node}, "/")
+
+		// --- set the key value ---
+
+		err = myself.etcdServOpt.SetMessage(key, reqMsg)
+
+		if err != nil {
+			break
+		}
+
+	}
+
+	// --- set use nats ---
 
 	fmt.Println(nodes)
 
@@ -135,11 +153,6 @@ func (myself *Agent) startWatchServer(cli *clientv3.Client) {
 }
 
 func (myself *Agent) checkRegCenterConnect() {
-
-}
-
-// getAllNodeIdsByRole define role string
-func (myself *Agent) getAllNodeIdsByRole(role string) {
 
 }
 

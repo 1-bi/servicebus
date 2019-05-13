@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	"github.com/coreos/etcd/clientv3"
+	"log"
 	"strings"
 )
 
@@ -45,10 +46,20 @@ func (myself EtcdServiceOperations) GetAllNodeIds(role string) ([]string, error)
 
 	for _, value := range resp.Kvs {
 
-		nodeId = strings.Replace(string(value.Key), prefix, "", 0)
+		nodeId = strings.Replace(string(value.Key), prefix, "", -1)
 
 		nodeIds = append(nodeIds, nodeId)
 	}
 
 	return nodeIds, nil
+}
+
+func (myself EtcdServiceOperations) SetMessage(key string, msgContent []byte) error {
+	_, err := myself.client.Put(context.TODO(), key, string(msgContent))
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
 }
