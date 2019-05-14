@@ -107,7 +107,7 @@ func (myself *AgentFixture) Test_Subscribe_Publish() {
 
 	})
 
-	fmt.Println("define event ")
+	time.Sleep(2 * time.Second)
 
 	myself.agent.Fire("agent.test.case1", []byte("hello testabdi"))
 }

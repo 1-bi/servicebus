@@ -118,6 +118,18 @@ func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback
 		return err
 	}
 
+	reqQ := new(schema.ReqQ)
+	reqQ.ReqId = reqEvent.ReqId
+	reqQ.Name = reqEvent.Name
+
+	var req []byte
+
+	req, err = reqQ.Marshal()
+
+	if err != nil {
+		return err
+	}
+
 	// get minion runinng node
 
 	nodes, err := myself.etcdServOpt.GetAllNodeIds("minion")
@@ -140,9 +152,7 @@ func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback
 
 	}
 
-	var msgName = strconv.FormatInt(reqEvent.ReqId, 10) + "=" + eventName
-
-	myself.natsConn.Publish("reqm", []byte(msgName))
+	myself.natsConn.Publish("reqm", req)
 
 	return nil
 }
@@ -179,15 +189,30 @@ func (myself *Agent) startWatchServer(cli *clientv3.Client) {
 }
 
 func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
+
 	sub, _ := conn.Subscribe("reqm", func(m *stan.Msg) {
-		fmt.Printf("Received a message: %fixture\n", string(m.Data))
+
+		/*
+			if logapi.GetLogger("serviebus.openNatsSubscribe").IsDebugEnabled() {
+				structBean := logapi.NewStructBean()
+				structBean.LogString("msgcontent", string(m.Data))
+				logapi.GetLogger("serviebus.openNatsSubscribe").Debug("Received a request message ", structBean)
+			}
+		*/
+
+		reqQ := new(schema.ReqQ)
+		err := reqQ.Unmarshal(m.Data)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println(reqQ)
+		fmt.Println("out request mq")
+
 	})
 
 	fmt.Println(sub)
-}
-
-func (myself *Agent) checkRegCenterConnect() {
-
 }
 
 // NewAgent check agent

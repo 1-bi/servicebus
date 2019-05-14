@@ -20,6 +20,62 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+// ReqQ message in queue
+type ReqQ struct {
+	ReqId                int64    `protobuf:"varint,1,opt,name=reqId,proto3" json:"reqId,omitempty"`
+	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ReqQ) Reset()         { *m = ReqQ{} }
+func (m *ReqQ) String() string { return proto.CompactTextString(m) }
+func (*ReqQ) ProtoMessage()    {}
+func (*ReqQ) Descriptor() ([]byte, []int) {
+	return fileDescriptor_eventmsg_ed6d9da7d98629e6, []int{0}
+}
+func (m *ReqQ) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ReqQ) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ReqQ.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (dst *ReqQ) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReqQ.Merge(dst, src)
+}
+func (m *ReqQ) XXX_Size() int {
+	return m.Size()
+}
+func (m *ReqQ) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReqQ.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReqQ proto.InternalMessageInfo
+
+func (m *ReqQ) GetReqId() int64 {
+	if m != nil {
+		return m.ReqId
+	}
+	return 0
+}
+
+func (m *ReqQ) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
 type ReqEvent struct {
 	ReqId                int64    `protobuf:"varint,1,opt,name=reqId,proto3" json:"reqId,omitempty"`
 	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
@@ -33,7 +89,7 @@ func (m *ReqEvent) Reset()         { *m = ReqEvent{} }
 func (m *ReqEvent) String() string { return proto.CompactTextString(m) }
 func (*ReqEvent) ProtoMessage()    {}
 func (*ReqEvent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_eventmsg_231af2efa9147649, []int{0}
+	return fileDescriptor_eventmsg_ed6d9da7d98629e6, []int{1}
 }
 func (m *ReqEvent) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -96,7 +152,7 @@ func (m *ResEvent) Reset()         { *m = ResEvent{} }
 func (m *ResEvent) String() string { return proto.CompactTextString(m) }
 func (*ResEvent) ProtoMessage()    {}
 func (*ResEvent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_eventmsg_231af2efa9147649, []int{1}
+	return fileDescriptor_eventmsg_ed6d9da7d98629e6, []int{2}
 }
 func (m *ResEvent) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -147,9 +203,42 @@ func (m *ResEvent) GetResultBody() []byte {
 }
 
 func init() {
+	proto.RegisterType((*ReqQ)(nil), "schema.ReqQ")
 	proto.RegisterType((*ReqEvent)(nil), "schema.ReqEvent")
 	proto.RegisterType((*ResEvent)(nil), "schema.ResEvent")
 }
+func (m *ReqQ) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ReqQ) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if m.ReqId != 0 {
+		dAtA[i] = 0x8
+		i++
+		i = encodeVarintEventmsg(dAtA, i, uint64(m.ReqId))
+	}
+	if len(m.Name) > 0 {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintEventmsg(dAtA, i, uint64(len(m.Name)))
+		i += copy(dAtA[i:], m.Name)
+	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return i, nil
+}
+
 func (m *ReqEvent) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -235,6 +324,25 @@ func encodeVarintEventmsg(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return offset + 1
 }
+func (m *ReqQ) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ReqId != 0 {
+		n += 1 + sovEventmsg(uint64(m.ReqId))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovEventmsg(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
 func (m *ReqEvent) Size() (n int) {
 	if m == nil {
 		return 0
@@ -293,6 +401,105 @@ func sovEventmsg(x uint64) (n int) {
 }
 func sozEventmsg(x uint64) (n int) {
 	return sovEventmsg(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *ReqQ) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEventmsg
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ReqQ: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ReqQ: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReqId", wireType)
+			}
+			m.ReqId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEventmsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ReqId |= (int64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEventmsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEventmsg
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEventmsg(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEventmsg
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *ReqEvent) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -659,18 +866,19 @@ var (
 	ErrIntOverflowEventmsg   = fmt.Errorf("proto: integer overflow")
 )
 
-func init() { proto.RegisterFile("eventmsg.proto", fileDescriptor_eventmsg_231af2efa9147649) }
+func init() { proto.RegisterFile("eventmsg.proto", fileDescriptor_eventmsg_ed6d9da7d98629e6) }
 
-var fileDescriptor_eventmsg_231af2efa9147649 = []byte{
-	// 157 bytes of a gzipped FileDescriptorProto
+var fileDescriptor_eventmsg_ed6d9da7d98629e6 = []byte{
+	// 168 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4b, 0x2d, 0x4b, 0xcd,
 	0x2b, 0xc9, 0x2d, 0x4e, 0xd7, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2b, 0x4e, 0xce, 0x48,
-	0xcd, 0x4d, 0x54, 0xf2, 0xe3, 0xe2, 0x08, 0x4a, 0x2d, 0x74, 0x05, 0x49, 0x0a, 0x89, 0x70, 0xb1,
-	0x16, 0xa5, 0x16, 0x7a, 0xa6, 0x48, 0x30, 0x2a, 0x30, 0x6a, 0x30, 0x07, 0x41, 0x38, 0x42, 0x42,
-	0x5c, 0x2c, 0x79, 0x89, 0xb9, 0xa9, 0x12, 0x4c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x60, 0xb6, 0x90,
-	0x04, 0x17, 0x7b, 0x6e, 0x71, 0xba, 0x53, 0x7e, 0x4a, 0xa5, 0x04, 0xb3, 0x02, 0xa3, 0x06, 0x4f,
-	0x10, 0x8c, 0xab, 0x14, 0x02, 0x32, 0xaf, 0x98, 0x54, 0xf3, 0xe4, 0xb8, 0xb8, 0x8a, 0x52, 0x8b,
-	0x4b, 0x73, 0x4a, 0x90, 0x8c, 0x44, 0x12, 0x71, 0x12, 0x38, 0xf1, 0x48, 0x8e, 0xf1, 0xc2, 0x23,
-	0x39, 0xc6, 0x07, 0x8f, 0xe4, 0x18, 0x67, 0x3c, 0x96, 0x63, 0x48, 0x62, 0x03, 0x7b, 0xc3, 0x18,
-	0x10, 0x00, 0x00, 0xff, 0xff, 0xe6, 0x30, 0xd6, 0x84, 0xd8, 0x00, 0x00, 0x00,
+	0xcd, 0x4d, 0x54, 0x32, 0xe0, 0x62, 0x09, 0x4a, 0x2d, 0x0c, 0x14, 0x12, 0xe1, 0x62, 0x2d, 0x4a,
+	0x2d, 0xf4, 0x4c, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x0e, 0x82, 0x70, 0x84, 0x84, 0xb8, 0x58,
+	0xf2, 0x12, 0x73, 0x53, 0x25, 0x98, 0x14, 0x18, 0x35, 0x38, 0x83, 0xc0, 0x6c, 0x25, 0x3f, 0x2e,
+	0x8e, 0xa0, 0xd4, 0x42, 0x57, 0x90, 0x71, 0xc4, 0xeb, 0x12, 0x92, 0xe0, 0x62, 0xcf, 0x2d, 0x4e,
+	0x77, 0xca, 0x4f, 0xa9, 0x94, 0x60, 0x56, 0x60, 0xd4, 0xe0, 0x09, 0x82, 0x71, 0x95, 0x42, 0x40,
+	0xe6, 0x15, 0x93, 0x6a, 0x9e, 0x1c, 0x17, 0x57, 0x51, 0x6a, 0x71, 0x69, 0x4e, 0x09, 0x92, 0x91,
+	0x48, 0x22, 0x4e, 0x02, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c,
+	0xe3, 0x8c, 0xc7, 0x72, 0x0c, 0x49, 0x6c, 0x60, 0x8f, 0x1b, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff,
+	0xc4, 0xd2, 0xb4, 0xcd, 0x0a, 0x01, 0x00, 0x00,
 }

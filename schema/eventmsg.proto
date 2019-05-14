@@ -1,6 +1,12 @@
 syntax = "proto3";
 package schema;
 
+/* ReqQ message in queue  */
+message ReqQ {
+  int64 reqId = 1;
+  string name = 2;
+}
+
 message ReqEvent {
   int64 reqId = 1;
   string name = 2;
@@ -12,3 +18,4 @@ message ResEvent {
   string name = 2;
   bytes resultBody = 3;
 }
+
