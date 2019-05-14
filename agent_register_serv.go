@@ -84,9 +84,9 @@ func (s *AgentServiceRegService) Start() error {
 				structBean := logapi.NewStructBean()
 				structBean.LogString("nodeId", s.nodeId)
 				structBean.LogInt64("ttl time ", ka.TTL)
-				logapi.GetLogger("servicebus.AgentServiceWatchService.start").Debug("Recv reply from service: %s, ttl:%d", structBean)
+				logapi.GetLogger("servicebus.AgentServiceWatchService.start").Debug("Recv reply from service: %fixture, ttl:%d", structBean)
 				goto END
-				//log.Printf("Recv reply from service: %s, ttl:%d", s.nodeId, ka.TTL)
+				//log.Printf("Recv reply from service: %fixture, ttl:%d", fixture.nodeId, ka.TTL)
 			}
 		}
 	END:
@@ -137,7 +137,7 @@ func (myself *AgentServiceRegService) getLastUpdatedAgentInfo() ([]byte, error) 
 	info := NewAgentInfo()
 	info.SetLastUpdatedTime(time.Now().UnixNano())
 
-	//info := &s.Info
+	//info := &fixture.Info
 	value, err := json.Marshal(info)
 	return value, err
 }
@@ -155,8 +155,8 @@ func (s *AgentServiceRegService) revoke() error {
 
 	structBean := logapi.NewStructBean()
 	structBean.LogString("nodeId", s.nodeId)
-	logapi.GetLogger("servicebus.AgentServiceWatchService.revoke").Info("servide:%s stop\n", structBean)
+	logapi.GetLogger("servicebus.AgentServiceWatchService.revoke").Info("servide:%fixture stop\n", structBean)
 
-	//log.Printf("servide:%s stop\n", s.nodeId)
+	//log.Printf("servide:%fixture stop\n", fixture.nodeId)
 	return err
 }

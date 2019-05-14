@@ -35,7 +35,7 @@ func main() {
 
 }
 
-func testReqResHandler1(handler servicebus.ServiceEventHandler) {
+func testReqResHandler1(handler servicebus.ReqMsgContext) {
 
 	handler.ConvertRequestBody(func() interface{} {
 		var reqData string
@@ -57,7 +57,7 @@ func testReqResHandler1(handler servicebus.ServiceEventHandler) {
 
 }
 
-func testReqResHandler2(handler servicebus.ServiceEventHandler) {
+func testReqResHandler2(handler servicebus.ReqMsgContext) {
 
 	handler.ConvertRequestBody(func() interface{} {
 		var reqData int
@@ -77,7 +77,7 @@ func testReqResHandler2(handler servicebus.ServiceEventHandler) {
 
 }
 
-func testReqResHandler3(handler servicebus.ServiceEventHandler) {
+func testReqResHandler3(handler servicebus.ReqMsgContext) {
 
 	handler.ConvertRequestBody(func() interface{} {
 		reqData := make(map[string]string, 0)
@@ -97,7 +97,7 @@ func testReqResHandler3(handler servicebus.ServiceEventHandler) {
 	})
 }
 
-func testReqResHandler4(handler servicebus.ServiceEventHandler) {
+func testReqResHandler4(handler servicebus.ReqMsgContext) {
 
 	handler.ConvertRequestBody(func() interface{} {
 		reqData := new(test.MockObj1)

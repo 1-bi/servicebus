@@ -4,7 +4,7 @@ import "github.com/1-bi/servicebus/schema"
 
 /**
  * --------------------------------- *
- * struct region
+ * fixture region
  * --------------------------------- *
  */
 /**

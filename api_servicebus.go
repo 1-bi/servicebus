@@ -16,7 +16,7 @@ type ServiceEvent interface {
 	/**
 	 * call one service handle
 	 */
-	On(eventName string, fn func(ServiceEventHandler)) error
+	On(eventName string, fn func(ReqMsgContext)) error
 
 	/**
 	 * fire service in synchronous mode
@@ -73,11 +73,10 @@ type EventbusContext interface {
  * define base result
  */
 type Result interface {
-
 	/**
 	 *	complement object
 	 */
-	Complete(refobj interface{})
+	Complete(refobj []byte)
 
 	/**
 	 *  add the result
@@ -89,17 +88,23 @@ type Result interface {
  * contruct service event handler
  * @deplecated this object is not to use
  */
-type ServiceEventHandler interface {
+type ReqMsgContext interface {
 
 	/**
 	 * define request body object
 	 */
-	ConvertRequestBody(func() (reqData interface{}))
+	//ConvertRequestBody(func() (reqData interface{}))
 
 	/**
 	 * define process handler
 	 */
-	Process(func(bc EventbusContext) uerrors.CodeError)
+	//Process(func(bc EventbusContext) uerrors.CodeError)
+
+	// GetMsgRawBody get request message from body
+	GetMsgRawBody() []byte
+
+	// get the response result context
+	GetResResult() Result
 }
 
 /**

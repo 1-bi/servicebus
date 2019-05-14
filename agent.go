@@ -7,6 +7,7 @@ import (
 	"github.com/1-bi/servicebus/schema"
 	"github.com/bwmarrin/snowflake"
 	"github.com/coreos/etcd/clientv3"
+	"github.com/nats-io/stan.go"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,6 +19,8 @@ var waitgroup sync.WaitGroup
 type Agent struct {
 	conf *Config
 
+	natsConn stan.Conn
+
 	nodeGenerater *snowflake.Node
 
 	etcdServOpt *etcd.EtcdServiceOperations
@@ -26,7 +29,6 @@ type Agent struct {
 func (myself *Agent) Start() {
 
 	node, err := snowflake.NewNode(myself.conf.nodeNum)
-
 	if err != nil {
 		logapi.GetLogger("start").Fatal(err.Error(), nil)
 	} else {
@@ -44,6 +46,15 @@ func (myself *Agent) Start() {
 		return
 	}
 
+	natsServer := strings.Join(myself.conf._natsHost, ",")
+	myself.natsConn, err = stan.Connect("test-cluster", "clienttest", stan.NatsURL(natsServer))
+	if err != nil {
+		structBean := logapi.NewStructBean()
+		structBean.LogStringArray("nats.server", myself.conf._natsHost)
+		logapi.GetLogger("serviebus.Start").Fatal("Connect nats server fail.", structBean)
+		return
+	}
+
 	servOptsMap := make(map[string]string, 0)
 	myself.etcdServOpt = etcd.NewEtcdServiceOperations(cli, servOptsMap)
 
@@ -58,6 +69,13 @@ func (myself *Agent) Start() {
 		myself.startWatchServer(cli)
 		waitgroup.Done()
 	}()
+
+	// open and connect nats subscribe queue message
+
+	go func() {
+		myself.openNatsSubscribe(myself.natsConn)
+	}()
+
 	// --- start watch server
 	waitgroup.Wait()
 }
@@ -67,13 +85,22 @@ func (myself *Agent) Stop() {
 }
 
 // On implement event name
-func (myself *Agent) On(eventName string, fn func(ServiceEventHandler)) error {
+func (myself *Agent) On(eventName string, fn func(ReqMsgContext)) error {
+
+	// --- send message to  nats ---
+	natsServer := strings.Join(myself.conf._natsHost, ",")
+	_, err := stan.Connect("serv-clusterId", "clienttest", stan.NatsURL(natsServer))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // Fire call by event name and define callback
 func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback) error {
+
+	// --- send message to  nats ---
 
 	// serialization runtimeArgs
 	reqEvent := new(schema.ReqEvent)
@@ -105,7 +132,6 @@ func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback
 		var key = strings.Join([]string{"reqm", strconv.FormatInt(reqEvent.ReqId, 10), "mi=" + node}, "/")
 
 		// --- set the key value ---
-
 		err = myself.etcdServOpt.SetMessage(key, reqMsg)
 
 		if err != nil {
@@ -114,9 +140,9 @@ func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback
 
 	}
 
-	// --- set use nats ---
+	var msgName = strconv.FormatInt(reqEvent.ReqId, 10) + "=" + eventName
 
-	fmt.Println(nodes)
+	myself.natsConn.Publish("reqm", []byte(msgName))
 
 	return nil
 }
@@ -152,11 +178,15 @@ func (myself *Agent) startWatchServer(cli *clientv3.Client) {
 
 }
 
-func (myself *Agent) checkRegCenterConnect() {
+func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
+	sub, _ := conn.Subscribe("reqm", func(m *stan.Msg) {
+		fmt.Printf("Received a message: %fixture\n", string(m.Data))
+	})
 
+	fmt.Println(sub)
 }
 
-func (myself *Agent) getNodeAgentList() {
+func (myself *Agent) checkRegCenterConnect() {
 
 }
 

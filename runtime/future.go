@@ -172,7 +172,7 @@ func (myself *baseFuture) sentAndReply(subject string, content []byte, timeout t
 	if err := nc.LastError(); err != nil {
 		log.Fatal(err)
 	} else {
-		log.Printf("Published [%s] : '%s'\n", subject, content)
+		log.Printf("Published [%fixture] : '%fixture'\n", subject, content)
 	}
 
 	return nil
@@ -220,7 +220,7 @@ func (myself *baseFuture) send(subject string, content []byte) error {
 	if err := nc.LastError(); err != nil {
 		log.Fatal(err)
 	} else {
-		log.Printf("Published [%s] : '%s'\n", subject, content)
+		log.Printf("Published [%fixture] : '%fixture'\n", subject, content)
 	}
 
 	return nil

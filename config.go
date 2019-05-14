@@ -11,6 +11,13 @@ import (
 type Config struct {
 	_etcdConfig clientv3.Config
 
+	// nats server connect
+	_natsHost []string
+
+	_natsClusterId string
+
+	_natsClientId string
+
 	// --- define default value --
 	nodeIdPath string
 
@@ -26,8 +33,23 @@ func NewConfig() *Config {
 
 	// --- set default value
 	conf.nodeIdPath = "/etc/servicebus/agent/node_id"
+	conf._natsHost = []string{"nats://localhost:4222"}
+	conf._natsClusterId = "test-cluster"
+	conf._natsClientId = "test-client"
 	conf.nodeNum = 1
 	return conf
+}
+
+func (myself *Config) SetNatsHost(hosts []string) {
+	myself._natsHost = hosts
+}
+
+func (myself *Config) SetNatsClusterId(newClusterId string) {
+	myself._natsClusterId = newClusterId
+}
+
+func (myself *Config) SetNatsClientId(newClientId string) {
+	myself._natsClientId = newClientId
 }
 
 func (myself *Config) SetNodeRoles(newRoles []string) {

@@ -25,7 +25,7 @@ func (this *eventbusContextImpl) GetRequestData() interface{} {
 }
 
 func (this *eventbusContextImpl) GetResult() servicebus.Result {
-	return this.result
+	return nil
 }
 
 func (this *eventbusContextImpl) GetServiceEvent() servicebus.ServiceEvent {

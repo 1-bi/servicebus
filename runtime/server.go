@@ -39,7 +39,7 @@ func NewServiceManager(natsUrl string) (servicebus.ServiceManager, error) {
 	//mpe := new(MessagePackEncoder)
 	//bsm.msgencoder = mpe
 
-	holder := make(map[string][]func(servicebus.ServiceEventHandler), 0)
+	holder := make(map[string][]func(servicebus.ReqMsgContext), 0)
 	bsm.fnHolder = holder
 	bsm.natsUrl = natsUrl
 	bsm.validate = validator.New()
@@ -60,7 +60,7 @@ func (myself *baseServiceManager) SetConfig(conf *servicebus.ServerConfig) error
 /**
  * define base global service handle
  */
-func (myself *baseServiceManager) On(serviceId string, fn func(servicebus.ServiceEventHandler)) error {
+func (myself *baseServiceManager) On(serviceId string, fn func(servicebus.ReqMsgContext)) error {
 
 	existedFn := myself.fnHolder[serviceId]
 
@@ -221,7 +221,7 @@ func (myself *baseServiceManager) ListenServices() error {
 		log.Fatal(err)
 	}
 
-	log.Printf("Listening on [%s]\n", subj)
+	log.Printf("Listening on [%fixture]\n", subj)
 
 	return nil
 }
@@ -255,7 +255,7 @@ func (myself *baseServiceManager) doRequest(req *schema.ReqMsg) []*schema.Result
 			eventHandler.serviceManager = myself
 
 			// --- predefine handler ----
-			servHandler(eventHandler)
+			//servHandler(eventHandler)
 
 			if eventHandler.bindRequestObj != nil {
 

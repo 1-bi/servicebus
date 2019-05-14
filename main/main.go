@@ -24,6 +24,8 @@ func main() {
 		DialTimeout: 2 * time.Second,
 	})
 
+	conf.SetNatsHost([]string{"nats://localhost:42232"})
+
 	conf.SetNodeRoles([]string{
 		"master", "minion",
 	})
@@ -80,10 +82,10 @@ func prepareLogSetting() {
 
 func regServer() {
 	/*
-		serviceName := "s-test"
+		serviceName := "fixture-test"
 		serviceInfo := servicebus.AgentInfo{IP: "vicenteyou"}
 
-		s, err := servicebus.NewAgentRegisterService(serviceName, serviceInfo, []string{
+		fixture, err := servicebus.NewAgentRegisterService(serviceName, serviceInfo, []string{
 			"http://localhost:2379",
 		})
 
@@ -91,14 +93,14 @@ func regServer() {
 			log.Fatal(err)
 		}
 
-		fmt.Printf("name:%s, ip:%s\n", s.nodeId, s.Info.IP)
+		fmt.Printf("name:%fixture, ip:%fixture\n", fixture.nodeId, fixture.Info.IP)
 
 		go func() {
 			time.Sleep(time.Second * 20)
-			s.Stop()
+			fixture.Stop()
 		}()
 
-		s.Start()
+		fixture.Start()
 	*/
 }
 

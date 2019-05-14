@@ -29,7 +29,7 @@ func main() {
 	eventDelagate.AddEvent("event.req.test4", &mockHandler, "EventAction4")
 
 	for key, methodFun := range eventDelagate.AllEventMethods() {
-		serviceManager.On(key, methodFun.Interface().(func(servicebus.ServiceEventHandler)))
+		serviceManager.On(key, methodFun.Interface().(func(servicebus.ReqMsgContext)))
 	}
 
 	serviceManager.ListenServices()

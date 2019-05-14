@@ -23,7 +23,7 @@ type baseServiceAgent struct {
 	/**
 	 * define function holder
 	 */
-	fnHolder map[string][]func(servicebus.ServiceEventHandler)
+	fnHolder map[string][]func(servicebus.ReqMsgContext)
 
 	natsUrl string
 
@@ -45,7 +45,7 @@ func NewServiceAgent(connectUrl string) servicebus.ServiceAgent {
 	// --- define defulat conf
 	bsa.runtimeConf = new(servicebus.AgentConfig)
 
-	holder := make(map[string][]func(servicebus.ServiceEventHandler), 0)
+	holder := make(map[string][]func(servicebus.ReqMsgContext), 0)
 
 	bsa.fnHolder = holder
 
@@ -64,7 +64,7 @@ func (myself *baseServiceAgent) SetConfig(agentConf *servicebus.AgentConfig) err
 /**
  * define base global service handle
  */
-func (myself *baseServiceAgent) On(serviceId string, fn func(servicebus.ServiceEventHandler)) error {
+func (myself *baseServiceAgent) On(serviceId string, fn func(servicebus.ReqMsgContext)) error {
 
 	existedFn := myself.fnHolder[serviceId]
 

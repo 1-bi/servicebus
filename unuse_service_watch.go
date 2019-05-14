@@ -68,11 +68,11 @@ func (m *Master) WatchNodes() {
 		for _, ev := range wresp.Events {
 			switch ev.Type {
 			case clientv3.EventTypePut:
-				fmt.Printf("[%s] %q : %q\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
+				fmt.Printf("[%fixture] %q : %q\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
 				info := GetServiceInfo(ev)
 				m.AddNode(string(ev.Kv.Key), info)
 			case clientv3.EventTypeDelete:
-				fmt.Printf("[%s] %q : %q\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
+				fmt.Printf("[%fixture] %q : %q\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
 				delete(m.Nodes, string(ev.Kv.Key))
 			}
 		}

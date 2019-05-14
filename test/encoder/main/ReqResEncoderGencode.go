@@ -42,7 +42,7 @@ func main() {
 
 }
 
-func testReqResHandlerEncoder(handler servicebus.ServiceEventHandler) {
+func testReqResHandlerEncoder(handler servicebus.ReqMsgContext) {
 
 	handler.ConvertRequestBody(func() interface{} {
 		var reqData string
@@ -64,7 +64,7 @@ func testReqResHandlerEncoder(handler servicebus.ServiceEventHandler) {
 
 }
 
-func testReqResHandlerEncoder2(handler servicebus.ServiceEventHandler) {
+func testReqResHandlerEncoder2(handler servicebus.ReqMsgContext) {
 
 	handler.ConvertRequestBody(func() interface{} {
 		var reqData int
@@ -84,7 +84,7 @@ func testReqResHandlerEncoder2(handler servicebus.ServiceEventHandler) {
 
 }
 
-func testReqResHandlerEncoder3(handler servicebus.ServiceEventHandler) {
+func testReqResHandlerEncoder3(handler servicebus.ReqMsgContext) {
 
 	handler.ConvertRequestBody(func() interface{} {
 		reqData := make(map[string]string, 0)
@@ -104,7 +104,7 @@ func testReqResHandlerEncoder3(handler servicebus.ServiceEventHandler) {
 	})
 }
 
-func testReqResHandlerEncoder4(handler servicebus.ServiceEventHandler) {
+func testReqResHandlerEncoder4(handler servicebus.ReqMsgContext) {
 
 	handler.ConvertRequestBody(func() interface{} {
 		reqData := new(test.MockObj1)
