@@ -199,8 +199,8 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 				logapi.GetLogger("serviebus.openNatsSubscribe").Debug("Received a request message ", structBean)
 			}
 		*/
-
 		reqQ := new(schema.ReqQ)
+		fmt.Println(reqQ)
 		err := reqQ.Unmarshal(m.Data)
 
 		if err != nil {
@@ -212,6 +212,7 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 
 	})
 
+	fmt.Println("Subscribe")
 	fmt.Println(sub)
 }
 
