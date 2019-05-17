@@ -200,7 +200,6 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 			}
 		*/
 		reqQ := new(schema.ReqQ)
-		fmt.Println(reqQ)
 		err := reqQ.Unmarshal(m.Data)
 
 		if err != nil {
@@ -212,7 +211,7 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 
 	})
 
-	fmt.Println("Subscribe")
+	fmt.Println("---------------=-=---------------------")
 	fmt.Println(sub)
 }
 

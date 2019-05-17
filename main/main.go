@@ -24,7 +24,7 @@ func main() {
 		DialTimeout: 2 * time.Second,
 	})
 
-	conf.SetNatsHost([]string{"nats://localhost:42232"})
+	conf.SetNatsHost([]string{"nats://localhost:4222"})
 
 	conf.SetNodeRoles([]string{
 		"master", "minion",

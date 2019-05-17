@@ -100,35 +100,3 @@ func Test_Req_Res_Case3(t *testing.T) {
 	agent.FireSyncService("event.req.test3", baseMap, timeout, resultRec)
 
 }
-
-func Test_Req_Res_Case4(t *testing.T) {
-
-	natsUrl := nats.DefaultURL
-
-	agent := rt.NewServiceAgent(natsUrl)
-
-	var timeout time.Duration
-	timeout = 3 * time.Second
-
-	mockObj1 := new(MockObj1)
-	mockObj1.Name = "Hello, good boy."
-	mockObj1.Age = 20
-
-	resultRec := func(result servicebus.FutureReturnResult, codeErr uerrors.CodeError) {
-
-		if codeErr != nil {
-			log.Panic(codeErr)
-		}
-
-		var resstr string
-
-		result.ReturnResult(&resstr)
-
-		fmt.Println(" response result ------------------ ")
-		fmt.Println(resstr)
-		fmt.Println(" response result ------------------ ")
-	}
-
-	agent.FireSyncService("event.req.test4", mockObj1, timeout, resultRec)
-
-}
