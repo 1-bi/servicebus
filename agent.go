@@ -7,6 +7,7 @@ import (
 	"github.com/1-bi/servicebus/schema"
 	"github.com/bwmarrin/snowflake"
 	"github.com/coreos/etcd/clientv3"
+	"github.com/gogo/protobuf/proto"
 	"github.com/nats-io/stan.go"
 	"strconv"
 	"strings"
@@ -123,8 +124,7 @@ func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback
 	reqQ.Name = reqEvent.Name
 
 	var req []byte
-
-	req, err = reqQ.Marshal()
+	req, err = proto.Marshal(reqQ)
 
 	if err != nil {
 		return err
@@ -192,21 +192,14 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 
 	sub, _ := conn.Subscribe("reqm", func(m *stan.Msg) {
 
-		/*
-			if logapi.GetLogger("serviebus.openNatsSubscribe").IsDebugEnabled() {
-				structBean := logapi.NewStructBean()
-				structBean.LogString("msgcontent", string(m.Data))
-				logapi.GetLogger("serviebus.openNatsSubscribe").Debug("Received a request message ", structBean)
-			}
-		*/
 		reqQ := new(schema.ReqQ)
-		err := reqQ.Unmarshal(m.Data)
 
-		if err != nil {
+		if err := proto.Unmarshal(m.Data, reqQ); err != nil {
 			fmt.Println(err)
 		}
+		fmt.Println(reqQ.ReqId)
+		fmt.Println(reqQ.Name)
 
-		fmt.Println(reqQ)
 		fmt.Println("out request mq")
 
 	})
