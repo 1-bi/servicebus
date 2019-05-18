@@ -113,7 +113,7 @@ func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback
 	// --- sent msg body ---
 	var reqMsg []byte
 
-	reqMsg, err := reqEvent.Marshal()
+	reqMsg, err := proto.Marshal(reqEvent)
 
 	if err != nil {
 		return err
@@ -197,6 +197,9 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 		if err := proto.Unmarshal(m.Data, reqQ); err != nil {
 			fmt.Println(err)
 		}
+
+		// --- get msg body from etcd cache --
+
 		fmt.Println(reqQ.ReqId)
 		fmt.Println(reqQ.Name)
 

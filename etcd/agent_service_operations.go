@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	"github.com/coreos/etcd/clientv3"
+	"github.com/pkg/errors"
 	"log"
 	"strings"
 )
@@ -62,4 +63,20 @@ func (myself EtcdServiceOperations) SetMessage(key string, msgContent []byte) er
 	}
 
 	return nil
+}
+
+func (myself EtcdServiceOperations) GetMesssage(key string) ([]byte, error) {
+
+	resp, err := myself.client.Get(context.TODO(), key)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Count == 0 {
+		return nil, errors.New("Could not get the value by key " + key)
+	}
+
+	return resp.Kvs[0].Value, nil
+
 }
