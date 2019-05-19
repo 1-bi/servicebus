@@ -1,7 +1,6 @@
 package servicebus
 
 import (
-	"context"
 	"fmt"
 	"github.com/1-bi/log-api"
 	"github.com/1-bi/servicebus/etcd"
@@ -10,10 +9,10 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/gogo/protobuf/proto"
 	"github.com/nats-io/stan.go"
+	"github.com/prometheus/common/log"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 )
 
 var waitgroup sync.WaitGroup
@@ -27,6 +26,8 @@ type Agent struct {
 	nodeGenerater *snowflake.Node
 
 	etcdServOpt *etcd.EtcdServiceOperations
+
+	regListeners map[string]func(ReqMsgContext)
 }
 
 func (myself *Agent) Start() {
@@ -90,12 +91,7 @@ func (myself *Agent) Stop() {
 // On implement event name
 func (myself *Agent) On(eventName string, fn func(ReqMsgContext)) error {
 
-	// --- send message to  nats ---
-	natsServer := strings.Join(myself.conf._natsHost, ",")
-	_, err := stan.Connect("serv-clusterId", "clienttest", stan.NatsURL(natsServer))
-	if err != nil {
-		return err
-	}
+	myself.regListeners[eventName] = fn
 
 	return nil
 }
@@ -237,14 +233,6 @@ func (myself *Agent) startWatchServer(cli *clientv3.Client) {
 }
 
 func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
-	var cli *clientv3.Client
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"http://localhost:2379"},
-		DialTimeout: 2 * time.Second,
-	})
-	if err != nil {
-		fmt.Println("okkdf")
-	}
 
 	_, _ = conn.Subscribe("reqm", func(m *stan.Msg) {
 
@@ -257,37 +245,38 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 		// --- get msg body from etcd cache --
 		var key = strings.Join([]string{"reqm", strconv.FormatInt(reqQ.ReqId, 10)}, "/")
 
-		fmt.Println("----------99- ")
-
-		resp, err := cli.Get(context.Background(), key)
+		// --- req message
+		req, err := myself.etcdServOpt.GetMesssage(key)
 
 		if err != nil {
-			fmt.Println("00")
+			fmt.Println(err)
 		}
 
-		fmt.Println("counter message")
-		fmt.Println(resp.Count)
+		// 解码
+		recReqEventMsg := new(schema.ReqEvent)
+		if err := proto.Unmarshal(req, recReqEventMsg); err != nil {
+			log.Fatal("failed to unmarshal: ", err)
+		}
 
-		// --- req message
-		/*
-			req, err := myself.etcdServOpt.GetMesssage(key)
+		// --- call event predefined
+		fn := myself.regListeners[recReqEventMsg.Name]
 
-			if err != nil {
-				fmt.Println(err)
-			}
+		if fn != nil {
 
-			// 解码
-			unmaReqEvent := new(schema.ReqEvent)
-			if err := proto.Unmarshal(req, unmaReqEvent); err != nil {
-				log.Fatal("failed to unmarshal: ", err)
-			}
+			// --- construct context ---
+			reqMsgCtx := newEmbeddedReqMsgContext()
+			reqMsgCtx.setMsgRawBody(recReqEventMsg.MsgBody)
 
-			fmt.Println(unmaReqEvent.ReqId)
-			fmt.Println(unmaReqEvent.Name)
-			fmt.Println(string(unmaReqEvent.MsgBody))
-		*/
+			// --- call message body --
+			fn(reqMsgCtx)
+
+		}
 
 	})
+
+}
+
+func (myself *Agent) buildReqMsgContext() {
 
 }
 
@@ -300,6 +289,8 @@ func NewAgent(conf *Config) *Agent {
 
 	var agent = new(Agent)
 	agent.conf = conf
+
+	agent.regListeners = make(map[string]func(ReqMsgContext))
 
 	//  start scheduler
 

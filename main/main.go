@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/1-bi/cron"
 	"github.com/1-bi/log-api"
 	"github.com/1-bi/log-zap"
@@ -42,12 +43,38 @@ func main() {
 
 	agent.Start()
 
-	defer agent.Stop()
+	//defer agent.Stop()
+	Client_AddListener(agent)
+
+	// --- call time service
+	go func() {
+		time.Sleep(6 * time.Second)
+		Client_fire(agent)
+	}()
 
 	// connect api --
 
 	// ---- keep program running ----
 	runtime.Goexit()
+
+}
+
+func Client_AddListener(clientApi servicebus.ClientApi) {
+
+	clientApi.On("test.event1", func(ctx servicebus.ReqMsgContext) {
+
+		fmt.Println(" call define event . ")
+		fmt.Println(string(ctx.GetMsgRawBody()))
+
+	})
+
+}
+
+func Client_fire(clientApi servicebus.ClientApi) {
+
+	var msg = "hello test case 1"
+
+	clientApi.FireByQueue("test.event1", []byte(msg))
 
 }
 

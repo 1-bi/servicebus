@@ -7,6 +7,8 @@ require (
 	github.com/1-bi/log-api v0.0.7
 	github.com/1-bi/log-zap v0.0.4
 	github.com/1-bi/uerrors v0.0.0-20181211134740-319f72cff4f5
+	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
+	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/coreos/bbolt v1.3.2 // indirect
@@ -44,6 +46,7 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nats-io/stan.go v0.4.4
 	github.com/pkg/errors v0.8.1
+	github.com/prometheus/common v0.0.0-20181126121408-4724e9255275
 	github.com/sirupsen/logrus v1.4.1 // indirect
 	github.com/smartystreets/gunit v0.0.0-20190426220047-d9c9211acd48
 	github.com/soheilhy/cmux v0.1.4 // indirect
@@ -54,6 +57,7 @@ require (
 	golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	google.golang.org/grpc v1.20.1 // indirect
+	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.28.0
 	gopkg.in/yaml.v2 v2.2.2 // indirect
