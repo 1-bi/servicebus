@@ -107,7 +107,7 @@ func (myself *AgentFixture) Test_Subscribe_Publish() {
 
 	})
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(6 * time.Second)
 
 	myself.agent.FireByQueue("agent.test.case1", []byte("hello testabdi"))
 }

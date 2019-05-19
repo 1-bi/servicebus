@@ -20,20 +20,44 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+type ReqQ_MsgComType int32
+
+const (
+	ReqQ_QUE ReqQ_MsgComType = 0
+	ReqQ_SUB ReqQ_MsgComType = 1
+)
+
+var ReqQ_MsgComType_name = map[int32]string{
+	0: "QUE",
+	1: "SUB",
+}
+var ReqQ_MsgComType_value = map[string]int32{
+	"QUE": 0,
+	"SUB": 1,
+}
+
+func (x ReqQ_MsgComType) String() string {
+	return proto.EnumName(ReqQ_MsgComType_name, int32(x))
+}
+func (ReqQ_MsgComType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_eventmsg_11c10a0a5c89c095, []int{0, 0}
+}
+
 // ReqQ message in queue
 type ReqQ struct {
-	ReqId                int64    `protobuf:"varint,1,opt,name=reqId,proto3" json:"reqId,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	ReqId                int64           `protobuf:"varint,1,opt,name=reqId,proto3" json:"reqId,omitempty"`
+	Name                 string          `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ComType              ReqQ_MsgComType `protobuf:"varint,3,opt,name=comType,proto3,enum=schema.ReqQ_MsgComType" json:"comType,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *ReqQ) Reset()         { *m = ReqQ{} }
 func (m *ReqQ) String() string { return proto.CompactTextString(m) }
 func (*ReqQ) ProtoMessage()    {}
 func (*ReqQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_eventmsg_ed6d9da7d98629e6, []int{0}
+	return fileDescriptor_eventmsg_11c10a0a5c89c095, []int{0}
 }
 func (m *ReqQ) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -76,6 +100,13 @@ func (m *ReqQ) GetName() string {
 	return ""
 }
 
+func (m *ReqQ) GetComType() ReqQ_MsgComType {
+	if m != nil {
+		return m.ComType
+	}
+	return ReqQ_QUE
+}
+
 type ReqEvent struct {
 	ReqId                int64    `protobuf:"varint,1,opt,name=reqId,proto3" json:"reqId,omitempty"`
 	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
@@ -89,7 +120,7 @@ func (m *ReqEvent) Reset()         { *m = ReqEvent{} }
 func (m *ReqEvent) String() string { return proto.CompactTextString(m) }
 func (*ReqEvent) ProtoMessage()    {}
 func (*ReqEvent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_eventmsg_ed6d9da7d98629e6, []int{1}
+	return fileDescriptor_eventmsg_11c10a0a5c89c095, []int{1}
 }
 func (m *ReqEvent) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -152,7 +183,7 @@ func (m *ResEvent) Reset()         { *m = ResEvent{} }
 func (m *ResEvent) String() string { return proto.CompactTextString(m) }
 func (*ResEvent) ProtoMessage()    {}
 func (*ResEvent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_eventmsg_ed6d9da7d98629e6, []int{2}
+	return fileDescriptor_eventmsg_11c10a0a5c89c095, []int{2}
 }
 func (m *ResEvent) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -206,6 +237,7 @@ func init() {
 	proto.RegisterType((*ReqQ)(nil), "schema.ReqQ")
 	proto.RegisterType((*ReqEvent)(nil), "schema.ReqEvent")
 	proto.RegisterType((*ResEvent)(nil), "schema.ResEvent")
+	proto.RegisterEnum("schema.ReqQ_MsgComType", ReqQ_MsgComType_name, ReqQ_MsgComType_value)
 }
 func (m *ReqQ) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
@@ -232,6 +264,11 @@ func (m *ReqQ) MarshalTo(dAtA []byte) (int, error) {
 		i++
 		i = encodeVarintEventmsg(dAtA, i, uint64(len(m.Name)))
 		i += copy(dAtA[i:], m.Name)
+	}
+	if m.ComType != 0 {
+		dAtA[i] = 0x18
+		i++
+		i = encodeVarintEventmsg(dAtA, i, uint64(m.ComType))
 	}
 	if m.XXX_unrecognized != nil {
 		i += copy(dAtA[i:], m.XXX_unrecognized)
@@ -336,6 +373,9 @@ func (m *ReqQ) Size() (n int) {
 	l = len(m.Name)
 	if l > 0 {
 		n += 1 + l + sovEventmsg(uint64(l))
+	}
+	if m.ComType != 0 {
+		n += 1 + sovEventmsg(uint64(m.ComType))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -479,6 +519,25 @@ func (m *ReqQ) Unmarshal(dAtA []byte) error {
 			}
 			m.Name = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ComType", wireType)
+			}
+			m.ComType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEventmsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ComType |= (ReqQ_MsgComType(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipEventmsg(dAtA[iNdEx:])
@@ -866,19 +925,22 @@ var (
 	ErrIntOverflowEventmsg   = fmt.Errorf("proto: integer overflow")
 )
 
-func init() { proto.RegisterFile("eventmsg.proto", fileDescriptor_eventmsg_ed6d9da7d98629e6) }
+func init() { proto.RegisterFile("eventmsg.proto", fileDescriptor_eventmsg_11c10a0a5c89c095) }
 
-var fileDescriptor_eventmsg_ed6d9da7d98629e6 = []byte{
-	// 168 bytes of a gzipped FileDescriptorProto
+var fileDescriptor_eventmsg_11c10a0a5c89c095 = []byte{
+	// 222 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4b, 0x2d, 0x4b, 0xcd,
 	0x2b, 0xc9, 0x2d, 0x4e, 0xd7, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2b, 0x4e, 0xce, 0x48,
-	0xcd, 0x4d, 0x54, 0x32, 0xe0, 0x62, 0x09, 0x4a, 0x2d, 0x0c, 0x14, 0x12, 0xe1, 0x62, 0x2d, 0x4a,
-	0x2d, 0xf4, 0x4c, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x0e, 0x82, 0x70, 0x84, 0x84, 0xb8, 0x58,
-	0xf2, 0x12, 0x73, 0x53, 0x25, 0x98, 0x14, 0x18, 0x35, 0x38, 0x83, 0xc0, 0x6c, 0x25, 0x3f, 0x2e,
-	0x8e, 0xa0, 0xd4, 0x42, 0x57, 0x90, 0x71, 0xc4, 0xeb, 0x12, 0x92, 0xe0, 0x62, 0xcf, 0x2d, 0x4e,
-	0x77, 0xca, 0x4f, 0xa9, 0x94, 0x60, 0x56, 0x60, 0xd4, 0xe0, 0x09, 0x82, 0x71, 0x95, 0x42, 0x40,
-	0xe6, 0x15, 0x93, 0x6a, 0x9e, 0x1c, 0x17, 0x57, 0x51, 0x6a, 0x71, 0x69, 0x4e, 0x09, 0x92, 0x91,
-	0x48, 0x22, 0x4e, 0x02, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c,
-	0xe3, 0x8c, 0xc7, 0x72, 0x0c, 0x49, 0x6c, 0x60, 0x8f, 0x1b, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff,
-	0xc4, 0xd2, 0xb4, 0xcd, 0x0a, 0x01, 0x00, 0x00,
+	0xcd, 0x4d, 0x54, 0x6a, 0x66, 0xe4, 0x62, 0x09, 0x4a, 0x2d, 0x0c, 0x14, 0x12, 0xe1, 0x62, 0x2d,
+	0x4a, 0x2d, 0xf4, 0x4c, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x0e, 0x82, 0x70, 0x84, 0x84, 0xb8,
+	0x58, 0xf2, 0x12, 0x73, 0x53, 0x25, 0x98, 0x14, 0x18, 0x35, 0x38, 0x83, 0xc0, 0x6c, 0x21, 0x43,
+	0x2e, 0xf6, 0xe4, 0xfc, 0xdc, 0x90, 0xca, 0x82, 0x54, 0x09, 0x66, 0x05, 0x46, 0x0d, 0x3e, 0x23,
+	0x71, 0x3d, 0x88, 0x61, 0x7a, 0x20, 0x83, 0xf4, 0x7c, 0x8b, 0xd3, 0x9d, 0x21, 0xd2, 0x41, 0x30,
+	0x75, 0x4a, 0x72, 0x5c, 0x5c, 0x08, 0x61, 0x21, 0x76, 0x2e, 0xe6, 0xc0, 0x50, 0x57, 0x01, 0x06,
+	0x10, 0x23, 0x38, 0xd4, 0x49, 0x80, 0x51, 0xc9, 0x8f, 0x8b, 0x23, 0x28, 0xb5, 0xd0, 0x15, 0xe4,
+	0x44, 0x12, 0x1c, 0x22, 0xc1, 0xc5, 0x9e, 0x5b, 0x9c, 0xee, 0x94, 0x9f, 0x52, 0x09, 0x76, 0x08,
+	0x4f, 0x10, 0x8c, 0xab, 0x14, 0x02, 0x32, 0xaf, 0x98, 0x54, 0xf3, 0xe4, 0xb8, 0xb8, 0x8a, 0x52,
+	0x8b, 0x4b, 0x73, 0x4a, 0x90, 0x8c, 0x44, 0x12, 0x71, 0x12, 0x38, 0xf1, 0x48, 0x8e, 0xf1, 0xc2,
+	0x23, 0x39, 0xc6, 0x07, 0x8f, 0xe4, 0x18, 0x67, 0x3c, 0x96, 0x63, 0x48, 0x62, 0x03, 0x07, 0xa6,
+	0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0x17, 0x5c, 0xf0, 0x5e, 0x5e, 0x01, 0x00, 0x00,
 }

@@ -1,6 +1,7 @@
 package servicebus
 
 import (
+	"context"
 	"fmt"
 	"github.com/1-bi/log-api"
 	"github.com/1-bi/servicebus/etcd"
@@ -12,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var waitgroup sync.WaitGroup
@@ -122,6 +124,7 @@ func (myself *Agent) FireByQueue(eventName string, msgBody []byte, callback ...C
 	reqQ := new(schema.ReqQ)
 	reqQ.ReqId = reqEvent.ReqId
 	reqQ.Name = reqEvent.Name
+	reqQ.ComType = schema.ReqQ_QUE
 
 	var req []byte
 	req, err = proto.Marshal(reqQ)
@@ -154,7 +157,7 @@ func (myself *Agent) FireByPublish(eventName string, msgBody []byte, callback ..
 	reqEvent.Name = eventName
 	reqEvent.MsgBody = msgBody
 
-	// --- sent msg body ---
+	// --- sent msg body ---+
 	var reqMsg []byte
 
 	reqMsg, err := proto.Marshal(reqEvent)
@@ -166,6 +169,7 @@ func (myself *Agent) FireByPublish(eventName string, msgBody []byte, callback ..
 	reqQ := new(schema.ReqQ)
 	reqQ.ReqId = reqEvent.ReqId
 	reqQ.Name = reqEvent.Name
+	reqQ.ComType = schema.ReqQ_SUB
 
 	var req []byte
 	req, err = proto.Marshal(reqQ)
@@ -233,8 +237,16 @@ func (myself *Agent) startWatchServer(cli *clientv3.Client) {
 }
 
 func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
+	var cli *clientv3.Client
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"http://localhost:2379"},
+		DialTimeout: 2 * time.Second,
+	})
+	if err != nil {
+		fmt.Println("okkdf")
+	}
 
-	sub, _ := conn.Subscribe("reqm", func(m *stan.Msg) {
+	_, _ = conn.Subscribe("reqm", func(m *stan.Msg) {
 
 		reqQ := new(schema.ReqQ)
 
@@ -245,18 +257,38 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 		// --- get msg body from etcd cache --
 		var key = strings.Join([]string{"reqm", strconv.FormatInt(reqQ.ReqId, 10)}, "/")
 
-		msg, err := myself.etcdServOpt.GetMesssage(key)
+		fmt.Println("----------99- ")
+
+		resp, err := cli.Get(context.Background(), key)
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("00")
 		}
-		fmt.Println("--0d9")
-		fmt.Println(string(msg))
-		fmt.Println("99009")
+
+		fmt.Println("counter message")
+		fmt.Println(resp.Count)
+
+		// --- req message
+		/*
+			req, err := myself.etcdServOpt.GetMesssage(key)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			// 解码
+			unmaReqEvent := new(schema.ReqEvent)
+			if err := proto.Unmarshal(req, unmaReqEvent); err != nil {
+				log.Fatal("failed to unmarshal: ", err)
+			}
+
+			fmt.Println(unmaReqEvent.ReqId)
+			fmt.Println(unmaReqEvent.Name)
+			fmt.Println(string(unmaReqEvent.MsgBody))
+		*/
 
 	})
 
-	fmt.Println(sub)
 }
 
 // NewAgent check agent
