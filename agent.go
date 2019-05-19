@@ -98,8 +98,52 @@ func (myself *Agent) On(eventName string, fn func(ReqMsgContext)) error {
 	return nil
 }
 
-// Fire call by event name and define callback
-func (myself *Agent) Fire(eventName string, msgBody []byte, callback ...Callback) error {
+// FireByQueue call by event name and define callback
+func (myself *Agent) FireByQueue(eventName string, msgBody []byte, callback ...Callback) error {
+
+	// --- send message to  nats ---
+
+	// serialization runtimeArgs
+	reqEvent := new(schema.ReqEvent)
+
+	reqEvent.ReqId = myself.nodeGenerater.Generate().Int64()
+	reqEvent.Name = eventName
+	reqEvent.MsgBody = msgBody
+
+	// --- sent msg body ---
+	var reqMsg []byte
+
+	reqMsg, err := proto.Marshal(reqEvent)
+
+	if err != nil {
+		return err
+	}
+
+	reqQ := new(schema.ReqQ)
+	reqQ.ReqId = reqEvent.ReqId
+	reqQ.Name = reqEvent.Name
+
+	var req []byte
+	req, err = proto.Marshal(reqQ)
+
+	if err != nil {
+		return err
+	}
+
+	// get minion runinng node
+
+	// --- key ---
+	var key = strings.Join([]string{"reqm", strconv.FormatInt(reqEvent.ReqId, 10)}, "/")
+
+	// --- set the key value ---
+	err = myself.etcdServOpt.SetMessage(key, reqMsg)
+
+	myself.natsConn.Publish("reqm", req)
+
+	return nil
+}
+
+func (myself *Agent) FireByPublish(eventName string, msgBody []byte, callback ...Callback) error {
 
 	// --- send message to  nats ---
 
@@ -199,15 +243,19 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 		}
 
 		// --- get msg body from etcd cache --
+		var key = strings.Join([]string{"reqm", strconv.FormatInt(reqQ.ReqId, 10)}, "/")
 
-		fmt.Println(reqQ.ReqId)
-		fmt.Println(reqQ.Name)
+		msg, err := myself.etcdServOpt.GetMesssage(key)
 
-		fmt.Println("out request mq")
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("--0d9")
+		fmt.Println(string(msg))
+		fmt.Println("99009")
 
 	})
 
-	fmt.Println("---------------=-=---------------------")
 	fmt.Println(sub)
 }
 

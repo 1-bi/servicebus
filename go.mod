@@ -43,6 +43,7 @@ require (
 	github.com/nats-io/nkeys v0.0.2 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nats-io/stan.go v0.4.4
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.1 // indirect
 	github.com/smartystreets/gunit v0.0.0-20190426220047-d9c9211acd48
 	github.com/soheilhy/cmux v0.1.4 // indirect
