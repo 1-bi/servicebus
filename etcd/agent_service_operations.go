@@ -2,7 +2,6 @@ package etcd
 
 import (
 	"context"
-	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/pkg/errors"
 	"log"
@@ -68,10 +67,7 @@ func (myself EtcdServiceOperations) SetMessage(key string, msgContent []byte) er
 
 func (myself EtcdServiceOperations) GetMesssage(key string) ([]byte, error) {
 
-	fmt.Println(" okbiid")
-
 	resp, err := myself.client.Get(context.TODO(), key)
-	fmt.Println("sdoi")
 
 	if err != nil {
 		return nil, err
@@ -83,4 +79,15 @@ func (myself EtcdServiceOperations) GetMesssage(key string) ([]byte, error) {
 
 	return resp.Kvs[0].Value, nil
 
+}
+
+func (myself EtcdServiceOperations) DelMessage(key string) ([]byte, error) {
+
+	resp, err := myself.client.Delete(context.TODO(), key)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.PrevKvs[0].Value, nil
 }

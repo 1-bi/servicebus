@@ -252,6 +252,14 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 			fmt.Println(err)
 		}
 
+		req, err = myself.etcdServOpt.DelMessage(key)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		// --- remove message ---
+
 		// 解码
 		recReqEventMsg := new(schema.ReqEvent)
 		if err := proto.Unmarshal(req, recReqEventMsg); err != nil {
