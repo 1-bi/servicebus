@@ -137,6 +137,24 @@ func (myself *Agent) FireByQueue(eventName string, msgBody []byte, callback ...C
 	// --- set the key value ---
 	err = myself.etcdServOpt.SetMessage(key, reqMsg)
 
+	// ---- start watcher listener ---
+	// --- connect client ---
+	var cli *clientv3.Client
+	cli, err = clientv3.New(myself.conf._etcdConfig)
+
+	if err != nil {
+		structBean := logapi.NewStructBean()
+		structBean.LogStringArray("etcd.server", myself.conf._etcdConfig.Endpoints)
+		logapi.GetLogger("serviebus.FireByQueue").Fatal("Connect etcd server fail.", structBean)
+
+	}
+	watcher := NewQueueWatcher(cli)
+	watcher.SetCallbacks(callback)
+	watcher.SetEventKey(strings.Join([]string{"resm", strconv.FormatInt(reqEvent.ReqId, 10)}, "/"))
+	go func() {
+		watcher.run()
+	}()
+
 	myself.natsConn.Publish("reqm", req)
 
 	return nil
@@ -198,6 +216,8 @@ func (myself *Agent) FireByPublish(eventName string, msgBody []byte, callback ..
 
 	myself.natsConn.Publish("reqm", req)
 
+	// --- start new watcher ---
+
 	return nil
 }
 
@@ -252,7 +272,7 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 			fmt.Println(err)
 		}
 
-		req, err = myself.etcdServOpt.DelMessage(key)
+		_, err = myself.etcdServOpt.DelMessage(key)
 
 		if err != nil {
 			fmt.Println(err)
@@ -272,11 +292,26 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 		if fn != nil {
 
 			// --- construct context ---
-			reqMsgCtx := newEmbeddedReqMsgContext()
+			reqMsgCtx := newEmbeddedReqMsgContext(reqQ)
 			reqMsgCtx.setMsgRawBody(recReqEventMsg.MsgBody)
 
 			// --- call message body --
 			fn(reqMsgCtx)
+
+			var resMsg []byte
+
+			resMsg, err := proto.Marshal(reqMsgCtx.resResult.ConvertRepResult())
+
+			if err != nil {
+				log.Error(err)
+			}
+			// --- write response
+			var resKey = strings.Join([]string{"resm", strconv.FormatInt(reqQ.ReqId, 10)}, "/")
+
+			err = myself.etcdServOpt.SetMessage(resKey, resMsg)
+			if err != nil {
+				log.Error(err)
+			}
 
 		}
 

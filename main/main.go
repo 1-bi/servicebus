@@ -66,6 +66,10 @@ func Client_AddListener(clientApi servicebus.ClientApi) {
 		fmt.Println(" call define event . ")
 		fmt.Println(string(ctx.GetMsgRawBody()))
 
+		var res = ctx.GetResResult()
+
+		res.Complete([]byte("response ok "))
+
 	})
 
 }

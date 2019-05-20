@@ -89,5 +89,8 @@ func (myself EtcdServiceOperations) DelMessage(key string) ([]byte, error) {
 		return nil, err
 	}
 
-	return resp.PrevKvs[0].Value, nil
+	if len(resp.PrevKvs) > 0 {
+		return resp.PrevKvs[0].Value, nil
+	}
+	return nil, nil
 }
