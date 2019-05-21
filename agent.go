@@ -148,8 +148,9 @@ func (myself *Agent) FireByQueue(eventName string, msgBody []byte, callback ...C
 		logapi.GetLogger("serviebus.FireByQueue").Fatal("Connect etcd server fail.", structBean)
 
 	}
+
 	watcher := NewQueueWatcher(cli)
-	watcher.SetCallbacks(callback)
+	watcher.SetCallbacks(callback...)
 	watcher.SetEventKey(strings.Join([]string{"resm", strconv.FormatInt(reqEvent.ReqId, 10)}, "/"))
 	go func() {
 		watcher.run()

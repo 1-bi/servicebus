@@ -16,3 +16,11 @@ func Test_Out(t *testing.T) {
 	i := <-c
 	fmt.Println(i)
 }
+
+type SuccessCallbackImpl struct {
+}
+
+func (myself *SuccessCallbackImpl) Succeed(content []byte) {
+	fmt.Println(" callback successfully .")
+	fmt.Println(string(content))
+}

@@ -78,8 +78,20 @@ func Client_fire(clientApi servicebus.ClientApi) {
 
 	var msg = "hello test case 1"
 
-	clientApi.FireByQueue("test.event1", []byte(msg))
+	var cb servicebus.SuccessCallback
 
+	cb = new(SuccessCallbackImpl)
+
+	clientApi.FireByQueue("test.event1", []byte(msg), cb)
+
+}
+
+type SuccessCallbackImpl struct {
+}
+
+func (myself *SuccessCallbackImpl) Succeed(content []byte) {
+	fmt.Println(" callback successfully .")
+	fmt.Println(string(content))
 }
 
 func prepareLogSetting() {
