@@ -255,7 +255,7 @@ func (myself *Agent) startWatchServer(cli *clientv3.Client) {
 
 func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 
-	_, _ = conn.Subscribe("reqm", func(m *stan.Msg) {
+	sub, err := conn.Subscribe("reqm", func(m *stan.Msg) {
 
 		reqQ := new(schema.ReqQ)
 
@@ -317,6 +317,14 @@ func (myself *Agent) openNatsSubscribe(conn stan.Conn) {
 		}
 
 	})
+
+	if err != nil {
+		log.Error(err)
+	}
+
+	// --- printsub scribe ---
+
+	sub.Unsubscribe()
 
 }
 
